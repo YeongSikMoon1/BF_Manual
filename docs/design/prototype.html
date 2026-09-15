@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html class="dark" lang="ko">
+<head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport">
+<title>BeFirst — BF Manual 프로토타입</title>
+
+<!-- ⚠️ 발표 전 반드시 로컬 파일로 교체할 것: frontend/css/tailwind.min.css -->
+<script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+<script>
+  tailwind.config = {
+    darkMode: 'class',
+    theme: { extend: {
+      colors: { brand: {
+        neon: '#2FE9A9', cyan: '#38EDDE', danger: '#FF3B30'
+      }},
+      fontFamily: { sans: ['-apple-system','BlinkMacSystemFont','"Pretendard"','"Segoe UI"','Roboto','sans-serif'] },
+      boxShadow: {
+        'neon-glow': '0 0 24px -2px rgba(47,233,169,0.35)',
+        'danger-glow': '0 0 16px -2px rgba(255,59,48,0.4)'
+      }
+    }}
+  }
+</script>
+
+<style>
+  .glass-card {
+    background: linear-gradient(145deg, rgba(25,34,49,.7) 0%, rgba(14,20,31,.85) 100%);
+    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+  }
+  .glass-card-active {
+    background: linear-gradient(145deg, rgba(20,48,52,.75) 0%, rgba(12,29,36,.9) 100%);
+    border-color: #2FE9A9; box-shadow: 0 0 20px -3px rgba(47,233,169,.3);
+  }
+  .hud-glass-card {
+    background: linear-gradient(135deg, rgba(13,24,37,.82) 0%, rgba(8,17,26,.92) 100%);
+    backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(45,212,191,.2);
+  }
+  .hud-glass-panel {
+    background: rgba(14,28,44,.65); backdrop-filter: blur(10px);
+    border: 1px solid rgba(56,189,248,.15);
+  }
+  .grid-blueprint {
+    background-size: 28px 28px;
+    background-image:
+      linear-gradient(to right, rgba(14,165,233,.08) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(14,165,233,.08) 1px, transparent 1px);
+  }
+  .alert-glow { animation: alertPulse 2s cubic-bezier(.4,0,.6,1) infinite; }
+  @keyframes alertPulse { 0%,100%{opacity:1} 50%{opacity:.75} }
+
+  .screen { display: none; }
+  .screen.active { display: flex; }
+
+  /* 경로 그려지는 애니메이션 */
+  @keyframes drawPath { to { stroke-dashoffset: 0; } }
+  .path-draw { stroke-dasharray: 400; stroke-dashoffset: 400; animation: drawPath 1s ease-out forwards; }
+
+  /* AR 바닥 쉐브론 */
+  @keyframes chevronMove {
+    0%   { transform: translateY(24px) scale(.9); opacity:.25 }
+    50%  { opacity: 1 }
+    100% { transform: translateY(-24px) scale(1.05); opacity:.1 }
+  }
+  .chevron-flow { animation: chevronMove 1.8s infinite ease-in-out; }
+  .ar-floor-perspective { perspective: 420px; perspective-origin: 50% 65%; }
+  .ar-path-plane { transform: rotateX(68deg); transform-origin: center bottom; }
+  @keyframes targetPing {
+    0%   { transform: scale(.95); box-shadow: 0 0 0 0 rgba(26,229,190,.7) }
+    70%  { transform: scale(1.08); box-shadow: 0 0 0 22px rgba(26,229,190,0) }
+    100% { transform: scale(.95); box-shadow: 0 0 0 0 rgba(26,229,190,0) }
+  }
+  .target-ring { animation: targetPing 2.2s infinite cubic-bezier(.4,0,.6,1); }
+</style>
+</head>
+
+<body class="bg-[#070B11] text-slate-100 min-h-screen flex justify-center font-sans antialiased overflow-x-hidden">
+
+<div class="w-full max-w-[430px] min-h-[100dvh] relative bg-gradient-to-b from-[#0B121E] via-[#070B11] to-[#04070A] border-x border-slate-800/40 shadow-2xl">
+
+<!-- ═══════════════════════════════════════════════════════════
+     화면 1 — 이동 상태 선택
+     ═══════════════════════════════════════════════════════════ -->
+<section id="screen1" class="screen active flex-col justify-between min-h-[100dvh] px-5 pt-3 pb-8">
+  <div class="flex flex-col w-full">
+
+    <header class="flex items-center justify-between mt-3 mb-4">
+      <div class="flex items-center space-x-2.5">
+        <!-- ⚠️ 로컬 교체: frontend/assets/logo.png -->
+        <div class="w-7 h-7 rounded-lg bg-brand-neon/20 border border-brand-neon/50 flex items-center justify-center text-brand-neon font-black text-sm drop-shadow-[0_0_8px_rgba(47,233,169,.5)]">B</div>
+        <span class="text-xl font-black tracking-tight text-white">BeFirst</span>
+      </div>
+      <a href="tel:119" aria-label="119 긴급 직통 전화" class="flex items-center space-x-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-red-600/90 to-red-700 active:scale-95 transition-all border border-red-400/40 shadow-danger-glow text-white">
+        <svg class="w-3.5 h-3.5 fill-current animate-pulse" viewBox="0 0 24 24"><path d="M6.62 10.79a15.05 15.05 0 006.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+        <span class="text-xs font-extrabold tracking-wider">119</span>
+      </a>
+    </header>
+
+    <section class="w-full mb-5">
+      <div class="w-full flex items-center space-x-2.5 px-3.5 py-2.5 rounded-xl border border-red-500/40 bg-red-950/40 backdrop-blur-md alert-glow">
+        <span class="flex h-2.5 w-2.5 relative flex-shrink-0">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
+        </span>
+        <p class="text-xs font-medium text-red-200 truncate" id="alert-text">
+          <strong class="font-bold text-red-400 mr-1">[화재 경보]</strong>3층 동측 화재 발생 중
+        </p>
+      </div>
+    </section>
+
+    <section class="mb-5">
+      <h1 class="text-2xl font-extrabold tracking-tight text-white leading-tight">현재 이동 상태를 선택해 주세요</h1>
+      <p class="text-xs text-slate-400 mt-1.5 leading-relaxed">
+        선택한 상태에 따라 <span class="text-brand-neon font-semibold">목적지가 달라집니다.</span>
+        계단 이용이 어려우면 같은 층 대피공간으로 안내합니다.
+      </p>
+    </section>
+
+    <!-- 카드는 스크립트가 동적으로 렌더링 (실제 구현에서는 /api/mobility 응답 사용) -->
+    <main id="mobility-grid" class="grid grid-cols-2 gap-3" role="radiogroup" aria-label="이동 가능 상태 선택"></main>
+  </div>
+
+  <footer class="w-full pt-4 mt-auto">
+    <button id="btn-confirm-mobility" type="button"
+      class="w-full py-4 px-6 rounded-2xl bg-brand-neon active:scale-[.98] text-slate-950 font-black text-base tracking-wide flex items-center justify-center space-x-2 shadow-neon-glow transition-all disabled:opacity-40 disabled:shadow-none">
+      <span>다음</span>
+      <svg class="w-5 h-5 stroke-current stroke-[2.5] fill-none" viewBox="0 0 24 24"><path d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <div class="w-32 h-1 bg-slate-700/60 rounded-full mx-auto mt-5"></div>
+  </footer>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     화면 2 — 평면도 / 현재 위치 탭 선택 / 경로
+     ═══════════════════════════════════════════════════════════ -->
+<section id="screen2" class="screen flex-col min-h-[100dvh] pb-6">
+
+  <header class="pt-3 px-4 pb-2 flex items-center justify-between sticky top-0 z-30 bg-[#0B1520]/85 backdrop-blur-md border-b border-cyan-950/40">
+    <div class="flex items-center space-x-2.5">
+      <div class="w-7 h-7 rounded-lg bg-brand-neon/20 border border-brand-neon/50 flex items-center justify-center text-brand-neon font-black text-sm">B</div>
+      <span class="text-xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400">BeFirst</span>
+    </div>
+    <a href="tel:119" class="flex items-center space-x-1.5 bg-rose-600/90 active:scale-95 text-white font-bold text-xs py-2 px-3 rounded-full border border-rose-400/40 transition-all">
+      <svg class="w-3.5 h-3.5 animate-pulse" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span>119</span>
+    </a>
+  </header>
+
+  <main class="flex-1 flex flex-col px-4 pt-3 space-y-3">
+
+    <!-- 이동 상태 배지 : 탭하면 화면1로 복귀 (자력이동 ↔ 휠체어 비교 시연용) -->
+    <button id="mobility-badge" type="button"
+      class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl border border-brand-neon/40 bg-emerald-950/30 active:scale-[.99] transition-all">
+      <div class="flex items-center space-x-2.5 min-w-0">
+        <span id="badge-icon" class="w-7 h-7 rounded-lg bg-emerald-500/20 border border-brand-neon/40 flex items-center justify-center text-brand-neon flex-shrink-0"></span>
+        <div class="text-left min-w-0">
+          <p class="text-[10px] text-slate-400 leading-none mb-1">이동 상태</p>
+          <p id="badge-label" class="text-sm font-bold text-white truncate leading-none">—</p>
+        </div>
+      </div>
+      <span class="text-[11px] text-brand-neon font-semibold flex items-center gap-1 flex-shrink-0">
+        변경
+        <svg class="w-3.5 h-3.5 stroke-current stroke-[2.5] fill-none" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </span>
+    </button>
+
+    <!-- 안내 문구 / 경로 요약 카드 -->
+    <section id="route-summary" class="hud-glass-card rounded-2xl p-3 relative overflow-hidden">
+      <div id="summary-empty" class="py-2 text-center">
+        <p class="text-sm font-bold text-white">평면도에서 현재 위치를 선택하세요</p>
+        <p class="text-[11px] text-slate-400 mt-1">방(회색 사각형)을 탭하면 대피 경로가 계산됩니다.</p>
+      </div>
+
+      <div id="summary-body" class="hidden">
+        <div class="flex items-center justify-between pb-2 mb-2 border-b border-cyan-500/20">
+          <div class="flex items-center space-x-2 min-w-0">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse flex-shrink-0"></span>
+            <span class="text-[11px] text-slate-400 flex-shrink-0">안전 목적지</span>
+            <span id="dest-name" class="text-sm font-bold text-cyan-200 truncate"></span>
+          </div>
+          <span id="dest-kind" class="text-[10px] font-medium px-2 py-0.5 rounded border flex-shrink-0 ml-2"></span>
+        </div>
+        <div class="grid grid-cols-3 gap-2 text-center">
+          <div class="hud-glass-panel rounded-lg py-1.5 flex flex-col items-center">
+            <span class="text-[10px] text-slate-400">이동 거리</span>
+            <span class="text-base font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-300"><span id="stat-dist">0</span><span class="text-xs text-cyan-300 font-bold ml-0.5">m</span></span>
+          </div>
+          <div class="hud-glass-panel rounded-lg py-1.5 flex flex-col items-center">
+            <span class="text-[10px] text-slate-400">예상 시간</span>
+            <span id="stat-eta" class="text-sm font-bold text-slate-100 mt-0.5">—</span>
+          </div>
+          <div class="hud-glass-panel rounded-lg py-1.5 flex flex-col items-center">
+            <span class="text-[10px] text-slate-400">현재 위치</span>
+            <span id="stat-start" class="text-xs font-bold text-teal-300 mt-1 truncate w-full px-1">—</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 평면도 -->
+    <section class="flex-1 relative rounded-2xl overflow-hidden border border-cyan-500/30 bg-[#061019] flex flex-col min-h-[300px]">
+      <div class="absolute inset-0 grid-blueprint opacity-60"></div>
+
+      <div class="relative z-10 px-3 pt-3 flex items-center justify-between">
+        <div class="flex items-center space-x-2 bg-slate-900/80 backdrop-blur px-2.5 py-1 rounded-md border border-cyan-500/30">
+          <span class="text-cyan-400 text-xs font-mono font-bold">LEVEL 3-F</span>
+          <span class="w-1 h-1 rounded-full bg-cyan-400"></span>
+          <span class="text-slate-300 text-[11px]">실내 대피 회랑도</span>
+        </div>
+        <div id="hazard-chip" class="flex items-center space-x-1 text-[11px] bg-slate-900/80 px-2 py-1 rounded border border-slate-700 text-slate-300">
+          <span class="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span>
+          <span>동측 차단됨</span>
+        </div>
+      </div>
+
+      <div class="relative flex-1 w-full flex items-center justify-center p-1">
+        <svg id="floorplan" class="w-full h-full" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <filter id="neonGlow" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="1.2" result="b"/>
+              <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+          <g id="layer-edges"></g>
+          <g id="layer-path"></g>
+          <g id="layer-nodes"></g>
+          <g id="layer-hazard"></g>
+        </svg>
+      </div>
+
+      <div class="relative z-10 px-3 py-2 bg-slate-950/75 backdrop-blur-sm border-t border-cyan-900/40 flex items-center justify-between text-[10px]">
+        <div class="flex items-center space-x-1.5"><span class="w-3 h-1 bg-emerald-400 rounded-full"></span><span class="text-slate-300">대피 동선</span></div>
+        <div class="flex items-center space-x-1.5"><span class="w-2.5 h-2.5 rounded-full bg-rose-500/80 border border-rose-300"></span><span class="text-slate-300">차단 구역</span></div>
+        <div class="flex items-center space-x-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-500/80"></span><span class="text-slate-300">연기</span></div>
+        <div class="flex items-center space-x-1.5"><span class="w-2.5 h-2.5 rounded-full bg-cyan-400"></span><span class="text-slate-300">현재지점</span></div>
+      </div>
+
+      <!-- 시연용 트리거 : 발표자가 상황 변화를 일으킨다 -->
+      <button id="btn-event" type="button"
+        class="absolute bottom-11 right-3 z-20 flex items-center gap-1.5 px-3 py-2 rounded-full bg-amber-500/90 text-slate-950 text-[11px] font-black shadow-lg active:scale-95 transition-all">
+        <svg class="w-3.5 h-3.5 stroke-current stroke-[2.5] fill-none" viewBox="0 0 24 24"><path d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        상황 변화
+      </button>
+    </section>
+
+    <!-- AI 행동요령 -->
+    <section id="guide-card" class="hidden hud-glass-card rounded-2xl p-3.5">
+      <div class="flex items-start justify-between gap-2 mb-2">
+        <h2 id="guide-headline" class="text-sm font-bold text-white leading-snug"></h2>
+        <span id="guide-source" class="text-[9px] font-bold px-1.5 py-0.5 rounded border flex-shrink-0 mt-0.5"></span>
+      </div>
+      <ol id="guide-steps" class="space-y-1.5 mb-2.5"></ol>
+      <div id="guide-cautions" class="space-y-1"></div>
+      <p class="text-[10px] text-slate-500 mt-2.5 pt-2 border-t border-slate-800">
+        AI가 생성한 안내입니다. 현장 상황과 다를 수 있으니 반드시 눈으로 확인하세요.
+      </p>
+    </section>
+  </main>
+
+  <footer class="px-4 pt-3 flex flex-col gap-2">
+    <button id="btn-start-ar" type="button" disabled
+      class="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400 text-slate-950 font-black text-base tracking-tight flex items-center justify-center space-x-2.5 active:scale-[.98] transition-transform disabled:opacity-30 disabled:grayscale">
+      <svg class="w-5 h-5 stroke-[2.2]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path d="M3 8V5a2 2 0 012-2h3m10 0h3a2 2 0 012 2v3m0 8v3a2 2 0 01-2 2h-3m-10 0H5a2 2 0 01-2-2v-3" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="12" cy="12" r="3.5"/>
+      </svg>
+      <span>AR 대피 안내 시작</span>
+    </button>
+    <button id="btn-help" type="button" disabled
+      class="w-full py-3 px-6 rounded-2xl border border-slate-600 bg-slate-900/60 text-slate-200 font-bold text-sm flex items-center justify-center gap-2 active:scale-[.98] transition-all disabled:opacity-30">
+      <svg class="w-4 h-4 stroke-current stroke-[2] fill-none" viewBox="0 0 24 24"><path d="M8 10h8M8 14h5M21 12a9 9 0 11-3.2-6.9L21 3v9z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      도움 요청 내용 보기
+    </button>
+    <div class="w-32 h-1 bg-slate-700/60 rounded-full mx-auto mt-2"></div>
+  </footer>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     화면 3 — AR 안내
+     ═══════════════════════════════════════════════════════════ -->
+<section id="screen3" class="screen flex-col min-h-[100dvh] relative overflow-hidden bg-[#070e17]">
+
+  <!-- 실제 카메라 영상 (권한 허용 시) -->
+  <video id="ar-video" class="absolute inset-0 w-full h-full object-cover z-0 hidden" autoplay playsinline muted></video>
+
+  <!-- 카메라 실패 시 폴백 배경 : 시연이 끊기지 않게 남겨둠 -->
+  <div id="ar-fallback-bg" class="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-b from-[#020509]/90 via-[#07131a]/60 to-[#02060b]/95"></div>
+    <svg class="absolute inset-0 w-full h-full opacity-40" preserveAspectRatio="none" viewBox="0 0 400 800">
+      <line x1="0" y1="0" x2="200" y2="350" stroke="#1ae5be" stroke-dasharray="4 6" stroke-width=".8" opacity=".4"/>
+      <line x1="400" y1="0" x2="200" y2="350" stroke="#1ae5be" stroke-dasharray="4 6" stroke-width=".8" opacity=".4"/>
+      <line x1="90" y1="120" x2="90" y2="600" stroke="#154050" stroke-width="2" opacity=".5"/>
+      <line x1="310" y1="120" x2="310" y2="600" stroke="#154050" stroke-width="2" opacity=".5"/>
+      <line x1="0" y1="800" x2="190" y2="380" stroke="#1ae5be" stroke-width="1.5" opacity=".3"/>
+      <line x1="400" y1="800" x2="210" y2="380" stroke="#1ae5be" stroke-width="1.5" opacity=".3"/>
+    </svg>
+    <div class="absolute top-[35%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-[#1ae5be]/10 rounded-full blur-3xl"></div>
+  </div>
+
+  <!-- 바닥 쉐브론 -->
+  <div class="absolute inset-0 z-10 pointer-events-none flex items-center justify-center ar-floor-perspective">
+    <div id="ar-chevrons" class="ar-path-plane flex flex-col items-center w-64 h-96 -mb-20 justify-center transition-transform duration-500">
+      <div class="flex flex-col items-center space-y-4 chevron-flow">
+        <svg class="w-16 h-8 text-[#1ae5be]/70 drop-shadow-[0_0_12px_#1ae5be]" fill="none" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 100 40"><polyline points="10,35 50,10 90,35"/></svg>
+        <svg class="w-24 h-12 text-[#1ae5be] drop-shadow-[0_0_18px_#1ae5be]" fill="none" stroke="currentColor" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 100 40"><polyline points="8,35 50,10 92,35"/></svg>
+        <svg class="w-36 h-16 text-[#3bfd9f] drop-shadow-[0_0_24px_#3bfd9f]" fill="none" stroke="currentColor" stroke-width="11" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 100 40"><polyline points="6,34 50,8 94,34"/></svg>
+        <div class="w-48 h-2 bg-gradient-to-r from-transparent via-[#3bfd9f] to-transparent blur-sm mt-2"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 타겟 링 -->
+  <div class="absolute top-[37%] left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 flex flex-col items-center pointer-events-none">
+    <div class="relative flex items-center justify-center w-28 h-28">
+      <div class="target-ring absolute w-24 h-24 rounded-full border-2 border-[#1ae5be]/80"></div>
+      <div class="w-20 h-20 rounded-full border-2 border-dashed border-[#00F2FE]/70 flex items-center justify-center bg-[#1ae5be]/10">
+        <div class="w-3 h-3 rounded-full bg-[#3bfd9f] shadow-[0_0_12px_#3bfd9f]"></div>
+      </div>
+    </div>
+    <div class="mt-2.5 px-3 py-1 rounded-full bg-[#081724]/90 border border-[#1ae5be]/50 backdrop-blur-md flex items-center gap-1.5">
+      <span class="w-2 h-2 rounded-full bg-[#3bfd9f] animate-ping"></span>
+      <span id="ar-target-badge" class="text-xs font-bold tracking-wide text-[#3bfd9f]">—</span>
+    </div>
+  </div>
+
+  <!-- 상단 HUD -->
+  <header class="relative z-20 pt-6 px-4 pb-2">
+    <div class="w-full bg-[#071521]/85 backdrop-blur-xl border border-[#1ae5be]/40 rounded-2xl p-3.5 flex items-center justify-between">
+      <div class="flex items-center gap-3 min-w-0">
+        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-[#1ae5be]/20 to-[#00F2FE]/10 border border-[#1ae5be]/50 flex items-center justify-center text-[#1ae5be] flex-shrink-0">
+          <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+        </div>
+        <div class="flex flex-col min-w-0">
+          <span class="text-xs text-slate-400 font-medium">다음 목표 지점</span>
+          <h1 id="ar-next-name" class="text-base font-bold text-white tracking-tight truncate">—</h1>
+          <p class="text-[11px] text-[#1ae5be] font-semibold">바닥 녹색 유도 화살표를 따라 이동</p>
+        </div>
+      </div>
+      <div class="text-right pl-2 border-l border-slate-800 flex-shrink-0">
+        <div class="text-lg font-black text-[#1ae5be] leading-none"><span id="ar-remain">0</span><span class="text-xs font-semibold ml-0.5">m</span></div>
+        <span class="text-[10px] text-slate-400">잔여 거리</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="flex-1"></div>
+
+  <!-- 하단 컨트롤 -->
+  <footer class="relative z-20 px-4 pb-6 space-y-2.5">
+    <div id="ar-camera-note" class="hidden text-[11px] text-amber-300 bg-amber-950/50 border border-amber-600/40 rounded-xl px-3 py-2 text-center">
+      카메라를 사용할 수 없어 시뮬레이션 화면으로 안내합니다.
+    </div>
+
+    <div class="bg-[#071521]/85 backdrop-blur-xl border border-slate-700/60 rounded-2xl p-3 flex items-center justify-between text-center">
+      <div class="flex-1">
+        <p class="text-[10px] text-slate-400">현재 층</p>
+        <p id="ar-floor" class="text-sm font-bold text-slate-100">3층</p>
+      </div>
+      <div class="w-px h-8 bg-slate-700"></div>
+      <div class="flex-1">
+        <p class="text-[10px] text-slate-400">남은 구간</p>
+        <p id="ar-legs" class="text-sm font-bold text-slate-100">—</p>
+      </div>
+      <div class="w-px h-8 bg-slate-700"></div>
+      <div class="flex-1">
+        <p class="text-[10px] text-slate-400">이동 상태</p>
+        <p id="ar-mobility" class="text-sm font-bold text-teal-300">—</p>
+      </div>
+    </div>
+
+    <button id="btn-ar-next" type="button"
+      class="w-full py-4 rounded-2xl bg-gradient-to-r from-emerald-400 to-cyan-400 text-slate-950 font-black text-base active:scale-[.98] transition-transform">
+      이 지점 도착
+    </button>
+    <button id="btn-ar-back" type="button"
+      class="w-full py-3 rounded-2xl border border-slate-600 bg-slate-900/70 text-slate-200 font-bold text-sm active:scale-[.98] transition-all">
+      평면도로 돌아가기
+    </button>
+  </footer>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     도움 요청 미리보기 모달
+     ═══════════════════════════════════════════════════════════ -->
+<div id="help-modal" class="hidden fixed inset-0 z-50 items-end justify-center bg-black/70 backdrop-blur-sm">
+  <div class="w-full max-w-[430px] bg-[#0C141F] border-t border-slate-700 rounded-t-3xl p-5 pb-8">
+    <div class="w-10 h-1 bg-slate-600 rounded-full mx-auto mb-4"></div>
+    <h2 class="text-lg font-extrabold text-white mb-1">도움 요청 내용</h2>
+    <p class="text-[11px] text-slate-400 mb-3">아래 내용을 보호자 또는 관리자에게 전달할 수 있습니다.</p>
+
+    <pre id="help-text" class="whitespace-pre-wrap text-xs leading-relaxed text-slate-200 bg-slate-900/80 border border-slate-700 rounded-xl p-3.5 max-h-[45vh] overflow-y-auto font-sans"></pre>
+
+    <div class="flex items-center gap-1.5 mt-3 px-3 py-2 rounded-lg bg-amber-950/40 border border-amber-700/40">
+      <svg class="w-3.5 h-3.5 text-amber-400 stroke-current stroke-[2] fill-none flex-shrink-0" viewBox="0 0 24 24"><path d="M12 9v4m0 4h.01M12 3a9 9 0 100 18 9 9 0 000-18z" stroke-linecap="round"/></svg>
+      <p class="text-[11px] text-amber-200">미리보기입니다. 실제 신고는 119로 해주세요.</p>
+    </div>
+
+    <div class="grid grid-cols-2 gap-2.5 mt-4">
+      <button id="btn-help-close" type="button" class="py-3.5 rounded-xl border border-slate-600 bg-slate-900 text-slate-200 font-bold text-sm active:scale-[.98]">닫기</button>
+      <button id="btn-help-copy" type="button" class="py-3.5 rounded-xl bg-brand-neon text-slate-950 font-black text-sm active:scale-[.98]">내용 복사</button>
+    </div>
+  </div>
+</div>
+
+<!-- 토스트 -->
+<div id="toast" class="hidden fixed top-4 left-1/2 -translate-x-1/2 z-[60] max-w-[400px] w-[92%] px-4 py-3 rounded-xl bg-amber-500 text-slate-950 text-xs font-bold shadow-2xl text-center"></div>
+
+</div>
+
+<script type="module">
+/* ══════════════════════════════════════════════════════════════
+   ⚠️ 프로토타입 전용 로직
+   실제 구현에서는 아래 GRAPH / findRoute / buildGuide 를 삭제하고
+   /api/building, /api/route, /api/guide, /api/help-message 호출로 교체합니다.
+   계산 규칙은 backend/app/services/ 와 동일하게 맞춰져 있습니다.
+   ══════════════════════════════════════════════════════════════ */
+
+// ── 건물 그래프 (backend/app/data/building.json 축약본) ──────────
+const GRAPH = {
+  nodes: [
+    { id:'F3-R301', type:'room', floor:3, name:'301호', x:12, y:35 },
+    { id:'F3-R302', type:'room', floor:3, name:'302호', x:12, y:70 },
+    { id:'F3-R303', type:'room', floor:3, name:'303호', x:68, y:35 },
+    { id:'F3-R304', type:'room', floor:3, name:'304호', x:68, y:70 },
+    { id:'F3-C1', type:'corridor', floor:3, name:'서측 복도', x:30, y:35 },
+    { id:'F3-C2', type:'corridor', floor:3, name:'중앙 복도', x:30, y:55 },
+    { id:'F3-C3', type:'corridor', floor:3, name:'남측 복도', x:30, y:70 },
+    { id:'F3-C4', type:'corridor', floor:3, name:'동측 복도', x:60, y:55 },
+    { id:'F3-C5', type:'corridor', floor:3, name:'서측 연결 복도', x:14, y:55 },
+    { id:'F3-REFUGE-A', type:'refuge', floor:3, name:'A계단 앞 방화구획 대피공간', x:24, y:18 },
+    { id:'F3-STAIR-A', type:'stair', floor:3, name:'A계단(3층)', x:18, y:10 },
+    { id:'F3-STAIR-B', type:'stair', floor:3, name:'B계단(3층)', x:82, y:10 },
+    { id:'F2-STAIR-A', type:'stair', floor:2, name:'A계단(2층)' },
+    { id:'F1-STAIR-A', type:'stair', floor:1, name:'A계단(1층)' },
+    { id:'F1-LOBBY', type:'corridor', floor:1, name:'1층 로비' },
+    { id:'F1-EXIT-1', type:'exit', floor:1, name:'정문 비상구' }
+  ],
+  edges: [
+    { from:'F3-R301', to:'F3-C1', dist:8,  kind:'door', step:false, width:90 },
+    { from:'F3-R302', to:'F3-C3', dist:8,  kind:'door', step:false, width:90 },
+    { from:'F3-R303', to:'F3-C4', dist:10, kind:'door', step:false, width:90 },
+    { from:'F3-R304', to:'F3-C4', dist:12, kind:'door', step:false, width:90 },
+    { from:'F3-C1', to:'F3-C2', dist:12, kind:'corridor', step:false, width:180 },
+    { from:'F3-C2', to:'F3-C3', dist:10, kind:'corridor', step:false, width:180 },
+    { from:'F3-C2', to:'F3-C4', dist:22, kind:'corridor', step:false, width:160 },
+    { from:'F3-C3', to:'F3-C5', dist:16, kind:'corridor', step:false, width:150 },
+    { from:'F3-C5', to:'F3-C1', dist:20, kind:'corridor', step:false, width:150 },
+    { from:'F3-C1', to:'F3-REFUGE-A', dist:14, kind:'fire_door', step:false, width:100 },
+    { from:'F3-REFUGE-A', to:'F3-STAIR-A', dist:6, kind:'door', step:false, width:100 },
+    { from:'F3-C4', to:'F3-STAIR-B', dist:25, kind:'door', step:true, width:100 },
+    { from:'F3-STAIR-A', to:'F2-STAIR-A', dist:20, kind:'stair', step:true, width:120 },
+    { from:'F2-STAIR-A', to:'F1-STAIR-A', dist:20, kind:'stair', step:true, width:120 },
+    { from:'F1-STAIR-A', to:'F1-LOBBY', dist:30, kind:'corridor', step:false, width:200 },
+    { from:'F1-LOBBY', to:'F1-EXIT-1', dist:15, kind:'door', step:false, width:150 }
+  ]
+};
+
+// ── 이동 상태 프로파일 (backend/app/services/mobility.py 와 동일) ──
+const PROFILES = [
+  { key:'independent', label:'혼자 이동 가능', desc:'계단 이용 → 1층 비상구',
+    stairs:true,  step:true,  minWidth:0,  speed:1.2, penalty:{},
+    icon:'<svg class="w-6 h-6 stroke-current fill-none stroke-[2.2]" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="4.5" r="2"/><path d="M6 18l3-3 2 1.5 3-4-2.5-3.5 3-2"/><path d="M10 21l2-4.5-1.5-2"/><path d="M5 12l3-1.5"/></svg>' },
+  { key:'walking_aid', label:'보행 보조기구', desc:'지팡이·목발·보행차 사용',
+    stairs:true,  step:false, minWidth:80, speed:0.6, penalty:{stair:3.0, fire_door:0.9},
+    icon:'<svg class="w-6 h-6 stroke-current fill-none stroke-[2]" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4a2 2 0 00-4 0v16"/><path d="M8 8a2 2 0 014 0"/><circle cx="6.5" cy="5.5" r="1.5"/><path d="M5 20l2.5-9L11 12"/></svg>' },
+  { key:'wheelchair', label:'휠체어 사용', desc:'계단 불가 → 같은 층 대피공간',
+    stairs:false, step:false, minWidth:90, speed:0.8, penalty:{fire_door:0.9},
+    icon:'<svg class="w-6 h-6 stroke-current fill-none stroke-[2]" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="4" r="2"/><path d="M12 6v6h4"/><path d="M8 12a4 4 0 104 4"/><path d="M15 19l4 2"/></svg>' },
+  { key:'need_help', label:'도움이 필요함', desc:'도움 필요 → 같은 층 대피공간',
+    stairs:false, step:false, minWidth:0,  speed:0.5, penalty:{},
+    icon:'<svg class="w-6 h-6 stroke-current fill-none stroke-[2]" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="5" r="2"/><circle cx="17" cy="6" r="1.8"/><path d="M7 7v7l-2 5"/><path d="M7 11h4l2 1"/><path d="M17 8v5l-2 4"/><path d="M11 14v5"/></svg>' }
+];
+
+// ── 시연 시나리오 ────────────────────────────────────────────────
+const SCENARIO = {
+  name: '3층 동측 화재',
+  blocked: ['F3-C4', 'F3-STAIR-B'],
+  smoke:   ['F3-C2'],
+  events: [{
+    id:'ev-1', label:'서측 연결 복도 차단',
+    addBlocked:['F3-C5'], addSmoke:['F3-C3'],
+    reason:'서측 연결 복도에 연기가 가득 차 통행이 불가능합니다.'
+  }]
+};
+
+// ── 상태 ────────────────────────────────────────────────────────
+const state = { mobility:null, pending:null, currentNode:null, events:[], route:null, arIndex:0 };
+
+const $  = (s) => document.querySelector(s);
+const $$ = (s) => document.querySelectorAll(s);
+const profileOf = (k) => PROFILES.find(p => p.key === k);
+
+// ── 경로 계산 (backend/app/services/pathfinder.py 와 동일 규칙) ──
+const SMOKE_PENALTY = 3.0;
+
+function hazardNow() {
+  let blocked = [...SCENARIO.blocked], smoke = [...SCENARIO.smoke], reasons = [];
+  SCENARIO.events.forEach(ev => {
+    if (state.events.includes(ev.id)) {
+      blocked = blocked.concat(ev.addBlocked);
+      smoke = smoke.concat(ev.addSmoke);
+      reasons.push(ev.reason);
+    }
+  });
+  smoke = smoke.filter(n => !blocked.includes(n));
+  return { blocked:[...new Set(blocked)], smoke:[...new Set(smoke)], reasons };
+}
+
+function adjacency() {
+  const adj = {};
+  GRAPH.nodes.forEach(n => adj[n.id] = []);
+  GRAPH.edges.forEach(e => {
+    adj[e.from].push({ ...e, to:e.to });
+    adj[e.to].push({ ...e, to:e.from, from:e.to });
+  });
+  return adj;
+}
+
+function passable(edge, p) {
+  if (edge.kind === 'stair' && !p.stairs) return false;
+  if (edge.step && !p.step && edge.kind !== 'stair') return false;
+  if ((edge.width ?? 999) < p.minWidth) return false;
+  return true;
+}
+
+function findRoute(startId, p, hz) {
+  const nodes = Object.fromEntries(GRAPH.nodes.map(n => [n.id, n]));
+  const adj = adjacency();
+  const start = nodes[startId];
+  const wantType = p.stairs ? 'exit' : 'refuge';
+
+  let cands = GRAPH.nodes.filter(n => n.type === wantType && !hz.blocked.includes(n.id));
+  if (!p.stairs) {
+    const same = cands.filter(n => n.floor === start.floor);
+    if (same.length) cands = same;
+  }
+  const targets = new Set(cands.map(n => n.id));
+  if (!targets.size) return { status:'no_route' };
+
+  const dist = { [startId]: 0 }, prev = {}, seen = new Set();
+  const pq = [[0, startId]];
+  let reached = null;
+
+  while (pq.length) {
+    pq.sort((a,b) => a[0]-b[0]);
+    const [d, cur] = pq.shift();
+    if (seen.has(cur)) continue;
+    seen.add(cur);
+    if (targets.has(cur)) { reached = cur; break; }
+
+    for (const e of adj[cur]) {
+      if (hz.blocked.includes(e.to) || seen.has(e.to)) continue;
+      if (!passable(e, p)) continue;
+      let c = e.dist * (p.penalty[e.kind] ?? 1);
+      if (hz.smoke.includes(e.to)) c *= SMOKE_PENALTY;
+      const nd = d + c;
+      if (nd < (dist[e.to] ?? Infinity)) { dist[e.to] = nd; prev[e.to] = [cur, e]; pq.push([nd, e.to]); }
+    }
+  }
+  if (!reached) return { status:'no_route' };
+
+  const path = [reached], legs = [];
+  let cur = reached;
+  while (prev[cur]) {
+    const [par, e] = prev[cur];
+    legs.unshift({ from:par, to:cur, dist:e.dist, kind:e.kind });
+    path.unshift(par); cur = par;
+  }
+  const total = legs.reduce((s,l) => s + l.dist, 0);
+
+  return {
+    status:'ok', path, legs,
+    nodes: path.map(id => nodes[id]),
+    start, destination: nodes[reached], destinationType: nodes[reached].type,
+    distance: Math.round(total*10)/10,
+    eta: Math.round(total / p.speed),
+    passesSmoke: path.filter(id => hz.smoke.includes(id)),
+    hazard: hz
+  };
+}
+
+// ── 행동요령 (AI 폴백 템플릿과 동일) ─────────────────────────────
+function buildGuide(r) {
+  if (r.status !== 'ok') {
+    return { headline:'안전한 경로를 찾지 못했습니다',
+      steps:['가까운 방 안으로 들어가 문을 닫으세요.','젖은 천으로 문틈을 막아 연기 유입을 차단하세요.','119에 현재 층과 호실을 알리고 구조를 기다리세요.'],
+      cautions:['화재 시 엘리베이터를 사용하지 마세요.'], source:'fallback' };
+  }
+  const isExit = r.destinationType === 'exit';
+  const steps = [
+    '문을 열기 전 손잡이가 뜨거운지 확인하세요.',
+    '자세를 낮추고 벽을 짚으며 이동하세요.',
+    `${r.destination.name}까지 약 ${r.distance}m 이동하세요.`,
+    isExit ? '건물 밖으로 나온 뒤 집결지로 이동하세요.'
+           : '대피공간에 들어가면 방화문을 닫고 119에 위치를 알린 뒤 구조를 기다리세요.'
+  ];
+  const cautions = ['화재 시 엘리베이터를 사용하지 마세요.'];
+  if (r.passesSmoke.length) cautions.push('경로 일부에 연기가 있습니다. 낮은 자세를 유지하세요.');
+  r.hazard.reasons.forEach(x => cautions.push(x));
+  return { headline:`${r.destination.name}(으)로 이동하세요`, steps, cautions, source:'fallback' };
+}
+
+// ── 도움 요청 문구 ──────────────────────────────────────────────
+function buildHelpText(r) {
+  const now = new Date().toTimeString().slice(0,5);
+  const L = ['[BF Manual 도움 요청]', `발생 시각: ${now}`,
+    `현재 위치: ${r.start.floor}층 ${r.start.name}`,
+    `이동 상태: ${profileOf(state.mobility).label}`];
+  if (r.status === 'ok') {
+    L.push(`목적지: ${r.destination.floor}층 ${r.destination.name}`);
+    L.push(`대피 유형: ${r.destinationType === 'exit' ? '외부 대피(비상구)' : '구조 대기(방화구획 대피공간)'}`);
+    L.push(`이동 거리: 약 ${r.distance}m (예상 ${r.eta}초)`);
+    if (r.passesSmoke.length) L.push('경로 중 연기 구간 있음');
+    r.hazard.reasons.forEach(x => L.push(`상황 변화: ${x}`));
+  } else {
+    L.push('상태: 안전 경로 확보 실패 — 현재 위치에서 구조 필요');
+  }
+  L.push('※ 본 내용은 미리보기입니다. 실제 신고는 119로 해주세요.');
+  return L.join('\n');
+}
+
+// ══════════════════════════════════════════════════════════════
+//  화면 전환
+// ══════════════════════════════════════════════════════════════
+function go(id) {
+  $$('.screen').forEach(s => s.classList.remove('active'));
+  $(`#${id}`).classList.add('active');
+  window.scrollTo(0, 0);
+  if (id === 'screen3') startAR();
+  else stopAR();
+}
+
+function toast(msg) {
+  const t = $('#toast');
+  t.textContent = msg;
+  t.classList.remove('hidden');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.add('hidden'), 3600);
+}
+
+// ══════════════════════════════════════════════════════════════
+//  화면 1
+// ══════════════════════════════════════════════════════════════
+function renderMobilityCards() {
+  $('#mobility-grid').innerHTML = PROFILES.map(p => `
+    <button type="button" role="radio" aria-checked="false" data-key="${p.key}"
+      class="mobility-card glass-card rounded-2xl p-4 flex flex-col justify-between items-start text-left min-h-[145px] border border-slate-700/60 active:scale-[.98] transition-all relative">
+      <div class="w-full flex items-center justify-between mb-2">
+        <div class="icon-wrap w-10 h-10 rounded-xl bg-slate-800/80 border border-slate-700 flex items-center justify-center text-slate-300">${p.icon}</div>
+        <div class="check-icon hidden w-5 h-5 rounded-full bg-brand-neon text-slate-950 items-center justify-center">
+          <svg class="w-3 h-3 stroke-current stroke-[3] fill-none" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+      </div>
+      <div>
+        <h2 class="text-sm font-bold text-slate-100">${p.label}</h2>
+        <p class="text-[11px] text-slate-400 mt-1 leading-snug">${p.desc}</p>
+      </div>
+    </button>`).join('');
+
+  $$('.mobility-card').forEach(btn => btn.addEventListener('click', () => selectMobility(btn.dataset.key)));
+}
+
+function selectMobility(key) {
+  state.pending = key;
+  $$('.mobility-card').forEach(btn => {
+    const on = btn.dataset.key === key;
+    btn.setAttribute('aria-checked', String(on));
+    btn.classList.toggle('glass-card-active', on);
+    btn.classList.toggle('glass-card', !on);
+    btn.classList.toggle('border-2', on);
+    btn.querySelector('.check-icon').classList.toggle('hidden', !on);
+    btn.querySelector('.check-icon').classList.toggle('flex', on);
+    btn.querySelector('.icon-wrap').className = on
+      ? 'icon-wrap w-10 h-10 rounded-xl bg-emerald-500/20 border border-brand-neon/40 flex items-center justify-center text-brand-neon'
+      : 'icon-wrap w-10 h-10 rounded-xl bg-slate-800/80 border border-slate-700 flex items-center justify-center text-slate-300';
+  });
+  $('#btn-confirm-mobility').disabled = false;
+}
+
+$('#btn-confirm-mobility').addEventListener('click', () => {
+  if (!state.pending) return;
+  const changed = state.mobility !== state.pending;
+  state.mobility = state.pending;
+  updateBadge();
+  go('screen2');
+  // 상태만 바꿔 다시 들어온 경우 -> 같은 위치로 경로 재계산 (비교 시연)
+  if (state.currentNode && changed) calcRoute(state.currentNode);
+  else renderPlan();
+});
+
+// ══════════════════════════════════════════════════════════════
+//  화면 2
+// ══════════════════════════════════════════════════════════════
+function updateBadge() {
+  const p = profileOf(state.mobility);
+  $('#badge-label').textContent = p.label;
+  $('#badge-icon').innerHTML = p.icon.replace('w-6 h-6', 'w-4 h-4');
+  $('#ar-mobility').textContent = p.label;
+}
+
+$('#mobility-badge').addEventListener('click', () => {
+  selectMobility(state.mobility);
+  go('screen1');
+});
+
+function renderPlan() {
+  const hz = hazardNow();
+  const f3 = GRAPH.nodes.filter(n => n.floor === 3);
+  const ids = new Set(f3.map(n => n.id));
+  const pos = Object.fromEntries(f3.map(n => [n.id, n]));
+
+  // 엣지
+  $('#layer-edges').innerHTML = GRAPH.edges
+    .filter(e => ids.has(e.from) && ids.has(e.to))
+    .map(e => `<line x1="${pos[e.from].x}" y1="${pos[e.from].y}" x2="${pos[e.to].x}" y2="${pos[e.to].y}" stroke="#1E3A5F" stroke-width="1.1"/>`).join('');
+
+  // 노드
+  $('#layer-nodes').innerHTML = f3.map(n => {
+    const blocked = hz.blocked.includes(n.id);
+    const smoke = hz.smoke.includes(n.id);
+    const sel = state.currentNode === n.id;
+    let el = '';
+
+    if (n.type === 'room') {
+      const fill = blocked ? 'rgba(239,68,68,.25)' : 'rgba(51,78,104,.35)';
+      const stroke = sel ? '#06B6D4' : (blocked ? '#EF4444' : '#334E68');
+      el += `<rect x="${n.x-7}" y="${n.y-5}" width="14" height="10" rx="1.5" fill="${fill}" stroke="${stroke}" stroke-width="${sel?1.6:0.8}"/>`;
+      el += `<text x="${n.x}" y="${n.y+1.3}" font-size="3.4" font-weight="bold" text-anchor="middle" fill="${sel?'#67E8F9':'#7A93AD'}">${n.name}</text>`;
+      if (sel) el += `<circle cx="${n.x}" cy="${n.y}" r="9" fill="none" stroke="#06B6D4" stroke-width=".6" opacity=".5"/>`;
+      // 탭 히트 영역(시각 요소보다 크게)
+      el += `<rect class="room-hit" data-id="${n.id}" x="${n.x-9}" y="${n.y-7}" width="18" height="14" fill="transparent" style="cursor:pointer"/>`;
+    } else if (n.type === 'refuge') {
+      el += `<circle cx="${n.x}" cy="${n.y}" r="3.6" fill="#10B981" stroke="#A7F3D0" stroke-width="1"/>`;
+      el += `<text x="${n.x}" y="${n.y-5.2}" font-size="3.2" font-weight="bold" text-anchor="middle" fill="#6EE7B7">대피공간</text>`;
+    } else if (n.type === 'stair') {
+      const c = blocked ? '#EF4444' : '#38BDF8';
+      el += `<rect x="${n.x-3}" y="${n.y-2.4}" width="6" height="4.8" rx="1" fill="none" stroke="${c}" stroke-width="1"/>`;
+      el += `<text x="${n.x}" y="${n.y+1.2}" font-size="2.8" text-anchor="middle" fill="${c}">${n.name.charAt(0)}</text>`;
+    } else {
+      const c = blocked ? '#EF4444' : (smoke ? '#F59E0B' : '#475A6E');
+      el += `<circle cx="${n.x}" cy="${n.y}" r="${blocked||smoke?2.4:1.6}" fill="${c}" opacity="${blocked||smoke?0.9:0.7}"/>`;
+    }
+    return el;
+  }).join('');
+
+  // 위험 표시
+  $('#layer-hazard').innerHTML = hz.blocked.filter(id => pos[id]).map(id => {
+    const n = pos[id];
+    return `<circle cx="${n.x}" cy="${n.y}" r="7" fill="rgba(239,68,68,.14)" stroke="#EF4444" stroke-dasharray="1.5 1.5" stroke-width=".7"/>
+            <path d="M${n.x-2.4} ${n.y-2.4} L${n.x+2.4} ${n.y+2.4} M${n.x+2.4} ${n.y-2.4} L${n.x-2.4} ${n.y+2.4}" stroke="#EF4444" stroke-width="1.1" stroke-linecap="round"/>`;
+  }).join('') + hz.smoke.filter(id => pos[id]).map(id => {
+    const n = pos[id];
+    return `<circle cx="${n.x}" cy="${n.y}" r="5.5" fill="rgba(245,158,11,.16)" stroke="#F59E0B" stroke-dasharray="1 1.5" stroke-width=".6"/>`;
+  }).join('');
+
+  // 경로
+  const layer = $('#layer-path');
+  layer.innerHTML = '';
+  const r = state.route;
+  if (r && r.status === 'ok') {
+    const onFloor = r.nodes.filter(n => n.floor === 3);
+    const pts = onFloor.map(n => `${n.x},${n.y}`).join(' ');
+    layer.innerHTML = `
+      <polyline points="${pts}" fill="none" stroke="#06B6D4" stroke-width="2.6" opacity=".35" stroke-linecap="round" stroke-linejoin="round" filter="url(#neonGlow)"/>
+      <polyline class="path-draw" points="${pts}" fill="none" stroke="#34D399" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>`;
+
+    // 다른 층으로 이어지는 구간은 점선으로 표시
+    if (r.nodes.some(n => n.floor !== 3)) {
+      const last = onFloor[onFloor.length-1];
+      layer.innerHTML += `
+        <line x1="${last.x}" y1="${last.y}" x2="${last.x}" y2="3" stroke="#34D399" stroke-width="1.2" stroke-dasharray="2 2"/>
+        <text x="${last.x+2}" y="4" font-size="3" fill="#6EE7B7" font-weight="bold">계단으로 1층 이동 ↓</text>`;
+    }
+    // 목적지 핀
+    const d = r.destination;
+    if (d.floor === 3) {
+      layer.innerHTML += `<circle cx="${d.x}" cy="${d.y}" r="6" fill="rgba(56,239,125,.22)"/>`;
+    }
+  }
+
+  $$('.room-hit').forEach(el => el.addEventListener('click', () => calcRoute(el.dataset.id)));
+  $('#hazard-chip').innerHTML = `<span class="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span><span>차단 ${hz.blocked.length}구역 · 연기 ${hz.smoke.length}구역</span>`;
+}
+
+function calcRoute(nodeId) {
+  state.currentNode = nodeId;
+  const p = profileOf(state.mobility);
+  const r = findRoute(nodeId, p, hazardNow());
+  state.route = r;
+  state.arIndex = 0;
+
+  const okRoute = r.status === 'ok';
+  $('#summary-empty').classList.toggle('hidden', okRoute);
+  $('#summary-body').classList.toggle('hidden', !okRoute);
+  $('#btn-start-ar').disabled = !okRoute;
+  $('#btn-help').disabled = false;
+
+  if (okRoute) {
+    const isExit = r.destinationType === 'exit';
+    $('#dest-name').textContent = r.destination.name;
+    const kind = $('#dest-kind');
+    kind.textContent = isExit ? '건물 외부 대피' : '같은 층 구조 대기';
+    kind.className = 'text-[10px] font-medium px-2 py-0.5 rounded border flex-shrink-0 ml-2 ' +
+      (isExit ? 'text-emerald-400 bg-slate-900/80 border-emerald-500/30'
+              : 'text-cyan-300 bg-slate-900/80 border-cyan-500/30');
+    $('#stat-dist').textContent = r.distance;
+    $('#stat-eta').textContent = r.eta >= 60 ? `약 ${Math.floor(r.eta/60)}분 ${r.eta%60}초` : `약 ${r.eta}초`;
+    $('#stat-start').textContent = r.start.name;
+  }
+
+  renderPlan();
+  renderGuide(buildGuide(r));
+}
+
+function renderGuide(g) {
+  $('#guide-card').classList.remove('hidden');
+  $('#guide-headline').textContent = g.headline;
+  const src = $('#guide-source');
+  src.textContent = g.source === 'ai' ? 'AI 생성' : '기본 안내';
+  src.className = 'text-[9px] font-bold px-1.5 py-0.5 rounded border flex-shrink-0 mt-0.5 ' +
+    (g.source === 'ai' ? 'text-brand-neon border-brand-neon/40 bg-emerald-950/40'
+                       : 'text-slate-400 border-slate-600 bg-slate-900');
+  $('#guide-steps').innerHTML = g.steps.map((s,i) => `
+    <li class="flex gap-2 text-xs text-slate-200 leading-relaxed">
+      <span class="flex-shrink-0 w-4 h-4 rounded-full bg-brand-neon/15 border border-brand-neon/40 text-brand-neon text-[9px] font-bold flex items-center justify-center mt-0.5">${i+1}</span>
+      <span>${s}</span>
+    </li>`).join('');
+  $('#guide-cautions').innerHTML = g.cautions.filter(Boolean).map(c => `
+    <p class="flex gap-1.5 text-[11px] text-amber-300 leading-snug">
+      <svg class="w-3 h-3 stroke-current stroke-[2] fill-none flex-shrink-0 mt-0.5" viewBox="0 0 24 24"><path d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span>${c}</span>
+    </p>`).join('');
+}
+
+// 시연용 상황 변화 트리거
+$('#btn-event').addEventListener('click', () => {
+  const next = SCENARIO.events.find(e => !state.events.includes(e.id));
+  if (!next) { toast('추가로 발생시킬 상황이 없습니다.'); return; }
+  state.events.push(next.id);
+  toast(`⚠ ${next.reason}`);
+  if (state.currentNode) calcRoute(state.currentNode);
+  else renderPlan();
+});
+
+// 도움 요청 미리보기
+$('#btn-help').addEventListener('click', () => {
+  if (!state.route) return;
+  $('#help-text').textContent = buildHelpText(state.route);
+  $('#help-modal').classList.remove('hidden');
+  $('#help-modal').classList.add('flex');
+});
+$('#btn-help-close').addEventListener('click', () => {
+  $('#help-modal').classList.add('hidden');
+  $('#help-modal').classList.remove('flex');
+});
+$('#btn-help-copy').addEventListener('click', async () => {
+  try { await navigator.clipboard.writeText($('#help-text').textContent); toast('내용이 복사되었습니다.'); }
+  catch { toast('복사에 실패했습니다. 길게 눌러 선택해 주세요.'); }
+});
+
+$('#btn-start-ar').addEventListener('click', () => { state.arIndex = 0; go('screen3'); });
+
+// ══════════════════════════════════════════════════════════════
+//  화면 3 — AR
+// ══════════════════════════════════════════════════════════════
+let arStream = null;
+
+async function startAR() {
+  renderAR();
+  try {
+    arStream = await navigator.mediaDevices.getUserMedia({ video:{ facingMode:'environment' } });
+    $('#ar-video').srcObject = arStream;
+    $('#ar-video').classList.remove('hidden');
+    $('#ar-fallback-bg').classList.add('hidden');
+    $('#ar-camera-note').classList.add('hidden');
+  } catch {
+    // 카메라 실패해도 시연은 계속된다
+    $('#ar-video').classList.add('hidden');
+    $('#ar-fallback-bg').classList.remove('hidden');
+    $('#ar-camera-note').classList.remove('hidden');
+  }
+}
+
+function stopAR() {
+  if (arStream) { arStream.getTracks().forEach(t => t.stop()); arStream = null; }
+  $('#ar-video').classList.add('hidden');
+}
+
+function renderAR() {
+  const r = state.route;
+  if (!r || r.status !== 'ok') return;
+  const legs = r.legs;
+  const i = Math.min(state.arIndex, legs.length - 1);
+  const leg = legs[i];
+  const nextNode = r.nodes.find(n => n.id === leg.to);
+  const remain = legs.slice(i).reduce((s,l) => s + l.dist, 0);
+
+  $('#ar-next-name').textContent = nextNode.name;
+  $('#ar-remain').textContent = Math.round(remain);
+  $('#ar-target-badge').textContent = `${r.destination.name}까지 ${Math.round(remain)}m`;
+  $('#ar-floor').textContent = `${nextNode.floor}층`;
+  $('#ar-legs').textContent = `${legs.length - i}개`;
+
+  // 다음 노드 방향으로 쉐브론을 살짝 회전 (같은 층일 때만)
+  const cur = r.nodes.find(n => n.id === leg.from);
+  if (cur?.x != null && nextNode?.x != null) {
+    const deg = Math.atan2(nextNode.x - cur.x, -(nextNode.y - cur.y)) * 180 / Math.PI;
+    $('#ar-chevrons').style.transform = `rotateX(68deg) rotateZ(${Math.max(-35, Math.min(35, deg))}deg)`;
+  }
+}
+
+$('#btn-ar-next').addEventListener('click', () => {
+  const legs = state.route.legs;
+  if (state.arIndex >= legs.length - 1) {
+    const isExit = state.route.destinationType === 'exit';
+    toast(isExit ? '건물 밖으로 나왔습니다. 집결지로 이동하세요.'
+                 : '대피공간에 도착했습니다. 방화문을 닫고 구조를 기다리세요.');
+    return;
+  }
+  state.arIndex++;
+  renderAR();
+});
+
+$('#btn-ar-back').addEventListener('click', () => go('screen2'));
+
+// ══════════════════════════════════════════════════════════════
+renderMobilityCards();
+selectMobility('independent');
+</script>
+</body>
+</html>

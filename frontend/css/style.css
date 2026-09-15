@@ -1,0 +1,148 @@
+/* ==========================================================================
+   BF Manual — 커스텀 스타일
+   Tailwind 유틸리티로 표현할 수 없는 것만 여기에 둔다.
+   색/여백/폰트크기 등 유틸리티로 되는 것은 HTML 클래스로 처리할 것.
+
+   주의: Play CDN 방식에서는 이 파일 안에서 @apply / @tailwind 를 쓸 수 없다.
+        (빌드 단계가 없으므로 전처리되지 않음)
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. 화면 전환
+   -------------------------------------------------------------------------- */
+.screen        { display: none; }
+.screen.active { display: flex; }
+
+
+/* --------------------------------------------------------------------------
+   2. 글래스모피즘 카드
+   -------------------------------------------------------------------------- */
+.glass-card {
+  background: linear-gradient(145deg, rgba(25, 34, 49, .7) 0%, rgba(14, 20, 31, .85) 100%);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.glass-card-active {
+  background: linear-gradient(145deg, rgba(20, 48, 52, .75) 0%, rgba(12, 29, 36, .9) 100%);
+  border-color: #2FE9A9;
+  box-shadow: 0 0 20px -3px rgba(47, 233, 169, .3);
+}
+
+.hud-glass-card {
+  background: linear-gradient(135deg, rgba(13, 24, 37, .82) 0%, rgba(8, 17, 26, .92) 100%);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(45, 212, 191, .2);
+}
+
+.hud-glass-panel {
+  background: rgba(14, 28, 44, .65);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(56, 189, 248, .15);
+}
+
+
+/* --------------------------------------------------------------------------
+   3. 평면도 배경 그리드
+   -------------------------------------------------------------------------- */
+.grid-blueprint {
+  background-size: 28px 28px;
+  background-image:
+    linear-gradient(to right,  rgba(14, 165, 233, .08) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(14, 165, 233, .08) 1px, transparent 1px);
+}
+
+
+/* --------------------------------------------------------------------------
+   4. 경보 / 경로 애니메이션
+   -------------------------------------------------------------------------- */
+@keyframes alertPulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: .75; }
+}
+.alert-glow { animation: alertPulse 2s cubic-bezier(.4, 0, .6, 1) infinite; }
+
+/* 경로 폴리라인이 그려지는 효과
+   stroke-dasharray 는 경로 길이에 따라 JS 에서 덮어쓰는 것이 정확하다.
+   (floorplan.js: el.style.strokeDasharray = el.getTotalLength()) */
+@keyframes drawPath { to { stroke-dashoffset: 0; } }
+.path-draw {
+  stroke-dasharray: 400;
+  stroke-dashoffset: 400;
+  animation: drawPath 1s ease-out forwards;
+}
+
+/* 우회 재탐색 시 이전 경로를 흐리게 남기는 용도 */
+.path-stale {
+  opacity: .28;
+  stroke-dasharray: 3 3;
+}
+
+
+/* --------------------------------------------------------------------------
+   5. AR 화면 (원근 / HUD)
+   -------------------------------------------------------------------------- */
+.ar-floor-perspective {
+  perspective: 420px;
+  perspective-origin: 50% 65%;
+}
+
+.ar-path-plane {
+  transform: rotateX(68deg);
+  transform-origin: center bottom;
+  transition: transform .5s ease-out;   /* 방향 전환 시 부드럽게 회전 */
+}
+
+@keyframes chevronMove {
+  0%   { transform: translateY(24px) scale(.9);   opacity: .25; }
+  50%  {                                          opacity: 1;   }
+  100% { transform: translateY(-24px) scale(1.05); opacity: .1;  }
+}
+.chevron-flow { animation: chevronMove 1.8s infinite ease-in-out; }
+
+@keyframes targetPing {
+  0%   { transform: scale(.95);  box-shadow: 0 0 0 0    rgba(26, 229, 190, .7); }
+  70%  { transform: scale(1.08); box-shadow: 0 0 0 22px rgba(26, 229, 190, 0);  }
+  100% { transform: scale(.95);  box-shadow: 0 0 0 0    rgba(26, 229, 190, 0);  }
+}
+.target-ring { animation: targetPing 2.2s infinite cubic-bezier(.4, 0, .6, 1); }
+
+
+/* --------------------------------------------------------------------------
+   6. 평면도 탭 영역
+   -------------------------------------------------------------------------- */
+.room-hit {
+  cursor: pointer;
+  fill: transparent;
+}
+/* 모바일에서 탭 시 파란 하이라이트 박스가 뜨는 것 방지 */
+#floorplan { -webkit-tap-highlight-color: transparent; }
+
+
+/* --------------------------------------------------------------------------
+   7. 접근성 — 모션 최소화 설정 존중
+   화재 안내 앱이므로 정보는 남기고 움직임만 줄인다.
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+  .path-draw { stroke-dashoffset: 0; }
+}
+
+
+/* --------------------------------------------------------------------------
+   8. 발표 환경 보정
+   -------------------------------------------------------------------------- */
+/* 노트북 브라우저에서 모바일 프레임 밖 영역 */
+body { overscroll-behavior: none; }
+
+/* iOS 노치/홈바 대응 */
+.safe-bottom { padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 1.5rem); }
+.safe-top    { padding-top:    calc(env(safe-area-inset-top, 0px)    + .75rem); }

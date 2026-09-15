@@ -1,0 +1,634 @@
+{
+  "_note": "실제 pathfinder 출력을 덤프한 샘플. 손으로 수정하지 말 것. 재생성 방법은 docs 하단 주석 참고.",
+  "independent": {
+    "status": "ok",
+    "mobility": "independent",
+    "mobility_label": "혼자 이동 가능",
+    "start": {
+      "id": "F3-R302",
+      "type": "room",
+      "floor": 3,
+      "name": "302호",
+      "x": 12,
+      "y": 70
+    },
+    "destination": {
+      "id": "F1-EXIT-1",
+      "type": "exit",
+      "floor": 1,
+      "name": "정문 비상구",
+      "x": 50,
+      "y": 92
+    },
+    "destination_type": "exit",
+    "facility": {
+      "description": "청사 정면 주출입구. 집결지는 정면 광장입니다.",
+      "equipment": [
+        "유도등"
+      ]
+    },
+    "path": [
+      {
+        "id": "F3-R302",
+        "type": "room",
+        "floor": 3,
+        "name": "302호",
+        "x": 12,
+        "y": 70
+      },
+      {
+        "id": "F3-C3",
+        "type": "corridor",
+        "floor": 3,
+        "name": "3층 남측 복도",
+        "x": 30,
+        "y": 70
+      },
+      {
+        "id": "F3-C5",
+        "type": "corridor",
+        "floor": 3,
+        "name": "3층 서측 연결 복도",
+        "x": 14,
+        "y": 55
+      },
+      {
+        "id": "F3-C1",
+        "type": "corridor",
+        "floor": 3,
+        "name": "3층 서측 복도",
+        "x": 30,
+        "y": 35
+      },
+      {
+        "id": "F3-REFUGE-A",
+        "type": "refuge",
+        "floor": 3,
+        "name": "A계단 앞 방화구획 대피공간",
+        "x": 24,
+        "y": 18,
+        "capacity": 6,
+        "fire_door": true
+      },
+      {
+        "id": "F3-STAIR-A",
+        "type": "stair",
+        "floor": 3,
+        "name": "A계단(3층)",
+        "x": 18,
+        "y": 12,
+        "stair_id": "A"
+      },
+      {
+        "id": "F2-STAIR-A",
+        "type": "stair",
+        "floor": 2,
+        "name": "A계단(2층)",
+        "x": 18,
+        "y": 12,
+        "stair_id": "A"
+      },
+      {
+        "id": "F1-STAIR-A",
+        "type": "stair",
+        "floor": 1,
+        "name": "A계단(1층)",
+        "x": 18,
+        "y": 12,
+        "stair_id": "A"
+      },
+      {
+        "id": "F1-LOBBY",
+        "type": "corridor",
+        "floor": 1,
+        "name": "1층 로비",
+        "x": 50,
+        "y": 50
+      },
+      {
+        "id": "F1-EXIT-1",
+        "type": "exit",
+        "floor": 1,
+        "name": "정문 비상구",
+        "x": 50,
+        "y": 92
+      }
+    ],
+    "legs": [
+      {
+        "from": "F3-R302",
+        "to": "F3-C3",
+        "dist": 8,
+        "kind": "door",
+        "step": false
+      },
+      {
+        "from": "F3-C3",
+        "to": "F3-C5",
+        "dist": 16,
+        "kind": "corridor",
+        "step": false
+      },
+      {
+        "from": "F3-C5",
+        "to": "F3-C1",
+        "dist": 20,
+        "kind": "corridor",
+        "step": false
+      },
+      {
+        "from": "F3-C1",
+        "to": "F3-REFUGE-A",
+        "dist": 14,
+        "kind": "fire_door",
+        "step": false
+      },
+      {
+        "from": "F3-REFUGE-A",
+        "to": "F3-STAIR-A",
+        "dist": 6,
+        "kind": "door",
+        "step": false
+      },
+      {
+        "from": "F3-STAIR-A",
+        "to": "F2-STAIR-A",
+        "dist": 20,
+        "kind": "stair",
+        "step": true
+      },
+      {
+        "from": "F2-STAIR-A",
+        "to": "F1-STAIR-A",
+        "dist": 20,
+        "kind": "stair",
+        "step": true
+      },
+      {
+        "from": "F1-STAIR-A",
+        "to": "F1-LOBBY",
+        "dist": 30,
+        "kind": "corridor",
+        "step": false
+      },
+      {
+        "from": "F1-LOBBY",
+        "to": "F1-EXIT-1",
+        "dist": 15,
+        "kind": "door",
+        "step": false
+      }
+    ],
+    "distance_m": 149,
+    "eta_sec": 124,
+    "passes_smoke": [],
+    "hazard": {
+      "blocked_nodes": [
+        "F3-C4",
+        "F3-STAIR-B"
+      ],
+      "smoke_nodes": [
+        "F3-C2"
+      ],
+      "reasons": []
+    }
+  },
+  "wheelchair": {
+    "status": "ok",
+    "mobility": "wheelchair",
+    "mobility_label": "휠체어 이용",
+    "start": {
+      "id": "F3-R302",
+      "type": "room",
+      "floor": 3,
+      "name": "302호",
+      "x": 12,
+      "y": 70
+    },
+    "destination": {
+      "id": "F3-REFUGE-A",
+      "type": "refuge",
+      "floor": 3,
+      "name": "A계단 앞 방화구획 대피공간",
+      "x": 24,
+      "y": 18,
+      "capacity": 6,
+      "fire_door": true
+    },
+    "destination_type": "refuge",
+    "facility": {
+      "description": "방화문으로 구획된 3층 대피공간. 외기에 면한 창이 있어 구조대 진입이 가능합니다.",
+      "equipment": [
+        "방화문",
+        "비상통화장치",
+        "제연설비"
+      ]
+    },
+    "path": [
+      {
+        "id": "F3-R302",
+        "type": "room",
+        "floor": 3,
+        "name": "302호",
+        "x": 12,
+        "y": 70
+      },
+      {
+        "id": "F3-C3",
+        "type": "corridor",
+        "floor": 3,
+        "name": "3층 남측 복도",
+        "x": 30,
+        "y": 70
+      },
+      {
+        "id": "F3-C5",
+        "type": "corridor",
+        "floor": 3,
+        "name": "3층 서측 연결 복도",
+        "x": 14,
+        "y": 55
+      },
+      {
+        "id": "F3-C1",
+        "type": "corridor",
+        "floor": 3,
+        "name": "3층 서측 복도",
+        "x": 30,
+        "y": 35
+      },
+      {
+        "id": "F3-REFUGE-A",
+        "type": "refuge",
+        "floor": 3,
+        "name": "A계단 앞 방화구획 대피공간",
+        "x": 24,
+        "y": 18,
+        "capacity": 6,
+        "fire_door": true
+      }
+    ],
+    "legs": [
+      {
+        "from": "F3-R302",
+        "to": "F3-C3",
+        "dist": 8,
+        "kind": "door",
+        "step": false
+      },
+      {
+        "from": "F3-C3",
+        "to": "F3-C5",
+        "dist": 16,
+        "kind": "corridor",
+        "step": false
+      },
+      {
+        "from": "F3-C5",
+        "to": "F3-C1",
+        "dist": 20,
+        "kind": "corridor",
+        "step": false
+      },
+      {
+        "from": "F3-C1",
+        "to": "F3-REFUGE-A",
+        "dist": 14,
+        "kind": "fire_door",
+        "step": false
+      }
+    ],
+    "distance_m": 58,
+    "eta_sec": 72,
+    "passes_smoke": [],
+    "hazard": {
+      "blocked_nodes": [
+        "F3-C4",
+        "F3-STAIR-B"
+      ],
+      "smoke_nodes": [
+        "F3-C2"
+      ],
+      "reasons": []
+    }
+  },
+  "wheelchair_rerouted": {
+    "status": "ok",
+    "mobility": "wheelchair",
+    "mobility_label": "휠체어 이용",
+    "start": {
+      "id": "F3-R302",
+      "type": "room",
+      "floor": 3,
+      "name": "302호",
+      "x": 12,
+      "y": 70
+    },
+    "destination": {
+      "id": "F3-REFUGE-A",
+      "type": "refuge",
+      "floor": 3,
+      "name": "A계단 앞 방화구획 대피공간",
+      "x": 24,
+      "y": 18,
+      "capacity": 6,
+      "fire_door": true
+    },
+    "destination_type": "refuge",
+    "facility": {
+      "description": "방화문으로 구획된 3층 대피공간. 외기에 면한 창이 있어 구조대 진입이 가능합니다.",
+      "equipment": [
+        "방화문",
+        "비상통화장치",
+        "제연설비"
+      ]
+    },
+    "path": [
+      {
+        "id": "F3-R302",
+        "type": "room",
+        "floor": 3,
+        "name": "302호",
+        "x": 12,
+        "y": 70
+      },
+      {
+        "id": "F3-C3",
+        "type": "corridor",
+        "floor": 3,
+        "name": "3층 남측 복도",
+        "x": 30,
+        "y": 70
+      },
+      {
+        "id": "F3-C2",
+        "type": "corridor",
+        "floor": 3,
+        "name": "3층 중앙 복도",
+        "x": 30,
+        "y": 55
+      },
+      {
+        "id": "F3-C1",
+        "type": "corridor",
+        "floor": 3,
+        "name": "3층 서측 복도",
+        "x": 30,
+        "y": 35
+      },
+      {
+        "id": "F3-REFUGE-A",
+        "type": "refuge",
+        "floor": 3,
+        "name": "A계단 앞 방화구획 대피공간",
+        "x": 24,
+        "y": 18,
+        "capacity": 6,
+        "fire_door": true
+      }
+    ],
+    "legs": [
+      {
+        "from": "F3-R302",
+        "to": "F3-C3",
+        "dist": 8,
+        "kind": "door",
+        "step": false
+      },
+      {
+        "from": "F3-C3",
+        "to": "F3-C2",
+        "dist": 10,
+        "kind": "corridor",
+        "step": false
+      },
+      {
+        "from": "F3-C2",
+        "to": "F3-C1",
+        "dist": 12,
+        "kind": "corridor",
+        "step": false
+      },
+      {
+        "from": "F3-C1",
+        "to": "F3-REFUGE-A",
+        "dist": 14,
+        "kind": "fire_door",
+        "step": false
+      }
+    ],
+    "distance_m": 44,
+    "eta_sec": 55,
+    "passes_smoke": [
+      "F3-C3",
+      "F3-C2"
+    ],
+    "hazard": {
+      "blocked_nodes": [
+        "F3-C4",
+        "F3-C5",
+        "F3-STAIR-B"
+      ],
+      "smoke_nodes": [
+        "F3-C2",
+        "F3-C3"
+      ],
+      "reasons": [
+        "서측 연결 복도에 연기가 가득 차 통행이 불가능합니다."
+      ]
+    }
+  },
+  "walking_aid": {
+    "status": "ok",
+    "mobility": "walking_aid",
+    "mobility_label": "보행 보조기구 사용",
+    "start": {
+      "id": "F3-R302",
+      "type": "room",
+      "floor": 3,
+      "name": "302호",
+      "x": 12,
+      "y": 70
+    },
+    "destination": {
+      "id": "F1-EXIT-1",
+      "type": "exit",
+      "floor": 1,
+      "name": "정문 비상구",
+      "x": 50,
+      "y": 92
+    },
+    "destination_type": "exit",
+    "facility": {
+      "description": "청사 정면 주출입구. 집결지는 정면 광장입니다.",
+      "equipment": [
+        "유도등"
+      ]
+    },
+    "path": [
+      {
+        "id": "F3-R302",
+        "type": "room",
+        "floor": 3,
+        "name": "302호",
+        "x": 12,
+        "y": 70
+      },
+      {
+        "id": "F3-C3",
+        "type": "corridor",
+        "floor": 3,
+        "name": "3층 남측 복도",
+        "x": 30,
+        "y": 70
+      },
+      {
+        "id": "F3-C5",
+        "type": "corridor",
+        "floor": 3,
+        "name": "3층 서측 연결 복도",
+        "x": 14,
+        "y": 55
+      },
+      {
+        "id": "F3-C1",
+        "type": "corridor",
+        "floor": 3,
+        "name": "3층 서측 복도",
+        "x": 30,
+        "y": 35
+      },
+      {
+        "id": "F3-REFUGE-A",
+        "type": "refuge",
+        "floor": 3,
+        "name": "A계단 앞 방화구획 대피공간",
+        "x": 24,
+        "y": 18,
+        "capacity": 6,
+        "fire_door": true
+      },
+      {
+        "id": "F3-STAIR-A",
+        "type": "stair",
+        "floor": 3,
+        "name": "A계단(3층)",
+        "x": 18,
+        "y": 12,
+        "stair_id": "A"
+      },
+      {
+        "id": "F2-STAIR-A",
+        "type": "stair",
+        "floor": 2,
+        "name": "A계단(2층)",
+        "x": 18,
+        "y": 12,
+        "stair_id": "A"
+      },
+      {
+        "id": "F1-STAIR-A",
+        "type": "stair",
+        "floor": 1,
+        "name": "A계단(1층)",
+        "x": 18,
+        "y": 12,
+        "stair_id": "A"
+      },
+      {
+        "id": "F1-LOBBY",
+        "type": "corridor",
+        "floor": 1,
+        "name": "1층 로비",
+        "x": 50,
+        "y": 50
+      },
+      {
+        "id": "F1-EXIT-1",
+        "type": "exit",
+        "floor": 1,
+        "name": "정문 비상구",
+        "x": 50,
+        "y": 92
+      }
+    ],
+    "legs": [
+      {
+        "from": "F3-R302",
+        "to": "F3-C3",
+        "dist": 8,
+        "kind": "door",
+        "step": false
+      },
+      {
+        "from": "F3-C3",
+        "to": "F3-C5",
+        "dist": 16,
+        "kind": "corridor",
+        "step": false
+      },
+      {
+        "from": "F3-C5",
+        "to": "F3-C1",
+        "dist": 20,
+        "kind": "corridor",
+        "step": false
+      },
+      {
+        "from": "F3-C1",
+        "to": "F3-REFUGE-A",
+        "dist": 14,
+        "kind": "fire_door",
+        "step": false
+      },
+      {
+        "from": "F3-REFUGE-A",
+        "to": "F3-STAIR-A",
+        "dist": 6,
+        "kind": "door",
+        "step": false
+      },
+      {
+        "from": "F3-STAIR-A",
+        "to": "F2-STAIR-A",
+        "dist": 20,
+        "kind": "stair",
+        "step": true
+      },
+      {
+        "from": "F2-STAIR-A",
+        "to": "F1-STAIR-A",
+        "dist": 20,
+        "kind": "stair",
+        "step": true
+      },
+      {
+        "from": "F1-STAIR-A",
+        "to": "F1-LOBBY",
+        "dist": 30,
+        "kind": "corridor",
+        "step": false
+      },
+      {
+        "from": "F1-LOBBY",
+        "to": "F1-EXIT-1",
+        "dist": 15,
+        "kind": "door",
+        "step": false
+      }
+    ],
+    "distance_m": 149,
+    "eta_sec": 248,
+    "passes_smoke": [],
+    "hazard": {
+      "blocked_nodes": [
+        "F3-C4",
+        "F3-STAIR-B"
+      ],
+      "smoke_nodes": [
+        "F3-C2"
+      ],
+      "reasons": []
+    }
+  }
+}

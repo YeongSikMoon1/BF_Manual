@@ -1,0 +1,45 @@
+{
+  "demo-1": {
+    "name": "3층 동측 화재",
+    "origin": "F3-R303 인근",
+    "blocked_nodes": [
+      "F3-C4",
+      "F3-STAIR-B"
+    ],
+    "smoke_nodes": [
+      "F3-C2"
+    ],
+    "events": [
+      {
+        "id": "ev-1",
+        "label": "서측 연결 복도 차단",
+        "add_blocked": [
+          "F3-C5"
+        ],
+        "add_smoke": [
+          "F3-C3"
+        ],
+        "reason": "서측 연결 복도에 연기가 가득 차 통행이 불가능합니다."
+      }
+    ]
+  },
+  "demo-2": {
+    "name": "1층 로비 화재",
+    "origin": "F1-LOBBY",
+    "blocked_nodes": [
+      "F1-LOBBY",
+      "F1-EXIT-1"
+    ],
+    "smoke_nodes": [
+      "F1-STAIR-A"
+    ],
+    "events": []
+  },
+  "none": {
+    "name": "위험 없음(테스트)",
+    "origin": null,
+    "blocked_nodes": [],
+    "smoke_nodes": [],
+    "events": []
+  }
+}
