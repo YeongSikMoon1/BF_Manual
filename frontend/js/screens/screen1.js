@@ -36,17 +36,18 @@ const DESTINATION_HINT = {
   refuge: '같은 층 대피공간으로 안내',
 };
 
-// 고정 아이콘 (서버 값이 아닌 상수 문자열). 모두 stroke + currentColor.
+// 고정 아이콘 (서버 값이 아닌 상수 문자열). stroke + currentColor, 머리는 채움(fill).
+// 굵은 픽토그램 형태라 선 굵기를 요소마다 따로 지정한다.
 const ICON_PATHS = {
   // 걷는 사람
   independent:
-    '<circle cx="13.5" cy="4.5" r="2"/><path d="M6 18l3-3 2 1.5 3-4-2.5-3.5 3-2"/><path d="M10 21l2-4.5-1.5-2"/><path d="M5 12l3-1.5"/>',
+    '<circle cx="12.3" cy="4.2" r="1.9" fill="currentColor" stroke="none"/><path d="M12.4 8v5.6" stroke-width="3.4"/><path d="M11 8.2L8.4 10.2 7.2 13M13.7 8.3l.9 2.6 2.7 1.8M12.2 13.6l4.3 6.7 1.8-.6M10.8 15.6l-4.4 5 1.8.7" stroke-width="2.4"/>',
   // 지팡이를 짚은 사람
   walking_aid:
-    '<path d="M16 4a2 2 0 00-4 0v16"/><path d="M8 8a2 2 0 014 0"/><circle cx="6.5" cy="5.5" r="1.5"/><path d="M5 20l2.5-9L11 12"/>',
+    '<circle cx="12.4" cy="4.5" r="1.8" fill="currentColor" stroke="none"/><path d="M12.4 8.3v5.3" stroke-width="4.4"/><path d="M11.3 13.5v7.1M13.5 13.5v7.1" stroke-width="1.9"/><path d="M10.2 8.2L9.3 12.4M14.7 8.2l.6 5" stroke-width="1.8"/><path d="M8 12.6h1.5M8.9 13l-1.6 8.1" stroke-width="1"/>',
   // 휠체어
   wheelchair:
-    '<circle cx="12" cy="4" r="2"/><path d="M12 6v6h4"/><path d="M8 12a4 4 0 104 4"/><path d="M15 19l4 2"/>',
+    '<circle cx="10.2" cy="5" r="2" fill="currentColor" stroke="none"/><path d="M10 8.8v5.2" stroke-width="3.2"/><path d="M10.2 14.3h5l2.6 5.2 2.1-1.1" stroke-width="2.6"/><path d="M11 11.4h4.4" stroke-width="1.6"/><path d="M7.8 11.9A5 5 0 1 0 15.2 17.8" stroke-width="1.3"/>',
   // 들어 올린 손 (도움 요청)
   need_help:
     '<path d="M8 12.5V6a1.5 1.5 0 013 0v5"/><path d="M11 10.5V4.5a1.5 1.5 0 013 0v6"/><path d="M14 10.5V6a1.5 1.5 0 013 0v7"/><path d="M8 11a1.5 1.5 0 00-3 0v3.5A6.5 6.5 0 0011.5 21h1a4.5 4.5 0 004.5-4.5V13"/><path d="M3.5 5.5L2 4M4 2.5L3.5 1"/>',
@@ -64,9 +65,9 @@ const CARD_OFF = ['glass-card', 'border-slate-700/60'];
 const CARD_ON = ['glass-card-active', 'border-2', 'border-brand-neon'];
 
 const ICON_WRAP_OFF =
-  'icon-wrap w-10 h-10 rounded-xl bg-slate-800/80 border border-slate-700 flex items-center justify-center text-slate-300';
+  'icon-wrap w-14 h-14 rounded-xl bg-slate-800/80 border border-slate-700 flex items-center justify-center text-slate-300';
 const ICON_WRAP_ON =
-  'icon-wrap w-10 h-10 rounded-xl bg-emerald-500/20 border border-brand-neon/40 flex items-center justify-center text-brand-neon';
+  'icon-wrap w-14 h-14 rounded-xl bg-emerald-500/20 border border-brand-neon/40 flex items-center justify-center text-brand-neon';
 
 /* ───────── DOM 생성 도우미 ───────── */
 
@@ -97,7 +98,7 @@ function createCard(profile) {
 
   const iconWrap = document.createElement('div');
   iconWrap.className = ICON_WRAP_OFF;
-  iconWrap.append(createIcon(ICON_PATHS[profile.key] || ICON_PATHS.fallback, 'w-6 h-6', '2'));
+  iconWrap.append(createIcon(ICON_PATHS[profile.key] || ICON_PATHS.fallback, 'w-10 h-10', '2'));
 
   const check = document.createElement('div');
   check.className = 'check-icon hidden w-5 h-5 rounded-full bg-brand-neon text-slate-950 items-center justify-center';
