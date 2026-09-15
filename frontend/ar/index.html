@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#04110e">
+  <title>BF AR 대피 안내</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='15' fill='%2308a887'/%3E%3Cpath d='M13 34h23l-8 8 7 7 19-19L35 11l-7 7 8 8H13z' fill='white'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="ar-screen" id="arScreen">
+    <video id="arCamera" autoplay muted playsinline aria-label="AR 대피용 후면 카메라"></video>
+    <canvas id="obstacleCanvas" aria-hidden="true"></canvas>
+    <div class="shade" aria-hidden="true"></div>
+    <header><div><small>BF AR 대피 안내</small><strong id="exitName">안전한 비상구</strong></div><span class="live"><i></i> LIVE</span></header>
+    <p class="obstacle-status" id="obstacleStatus" role="status">대형 장애물 인식 준비 중</p>
+    <section class="guidance" aria-live="polite">
+      <div class="arrow-wrap"><div class="arrow forward" id="arrow" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div></div>
+      <span class="direction-cue" id="directionCue">정면</span>
+      <strong id="direction">정면으로 이동하세요</strong>
+      <p>바닥 화살표를 따라 천천히 이동하세요.</p>
+    </section>
+    <section class="status">
+      <div><small>현재 구간 거리</small><strong><span id="distance">24</span>m</strong></div>
+      <div><small>현재 위치</small><strong id="location">2층 205호</strong></div>
+    </section>
+    <p class="message" id="message" role="status">카메라를 연결하고 있습니다.</p>
+    <nav class="controls" aria-label="AR 안내 도구">
+      <button id="mapButton" aria-pressed="false"><b>🗺️</b><span>경로 지도</span></button>
+      <button id="torchButton" disabled aria-pressed="false"><b>⚡</b><span>손전등</span></button>
+      <button id="voiceButton" class="active" aria-pressed="true"><b>🔊</b><span>음성 안내</span></button>
+      <button id="signalButton" aria-pressed="false"><b>📣</b><span>호출 신호</span></button>
+    </nav>
+    <div class="map-modal" id="mapModal" role="dialog" aria-modal="true" aria-labelledby="mapTitle" hidden>
+      <section class="map-card"><header><div><small>대피 경로</small><strong id="mapTitle">평면도 내 현재 위치</strong></div><button id="mapClose" aria-label="지도 닫기">×</button></header><div class="map-view"><img id="mapImage" alt=""><svg viewBox="0 0 100 100" preserveAspectRatio="none"><polyline class="route-shadow" id="routeShadow"/><polyline class="route" id="routeLine"/><circle class="exit" id="exitDot" r="1.5"/></svg><span class="walker" id="walker">🚶</span></div><footer><div><strong id="progress">출발 지점</strong><span id="remaining">전체 거리 계산 중</span><small id="history">제외된 경로 없음</small></div><div><button id="resetButton" disabled>우회 기록 초기화</button><button id="detourButton">다른 안전 출구 찾기</button></div></footer></section>
+    </div>
+  </main>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.3"></script>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
