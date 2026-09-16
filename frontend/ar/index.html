@@ -55,7 +55,7 @@
           #070b11 55%,
           #04070a 100%
         );
-        transition: opacity 0.4s ease;
+        transition: opacity 0.6s ease;
       }
 
       #splash-screen.splash-fadeout {
@@ -70,28 +70,6 @@
           circle at 50% 42%,
           rgba(47, 233, 169, 0.16) 0%,
           rgba(47, 233, 169, 0) 60%
-        );
-        pointer-events: none;
-      }
-
-      .splash-grid {
-        position: absolute;
-        inset: 0;
-        background-image:
-          linear-gradient(rgba(148, 163, 184, 0.05) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(148, 163, 184, 0.05) 1px, transparent 1px);
-        background-size: 40px 40px;
-        mask-image: radial-gradient(
-          circle at 50% 50%,
-          rgba(0, 0, 0, 1) 0%,
-          rgba(0, 0, 0, 0.15) 70%,
-          transparent 100%
-        );
-        -webkit-mask-image: radial-gradient(
-          circle at 50% 50%,
-          rgba(0, 0, 0, 1) 0%,
-          rgba(0, 0, 0, 0.15) 70%,
-          transparent 100%
         );
         pointer-events: none;
       }
@@ -203,7 +181,7 @@
           -apple-system,
           'Malgun Gothic',
           sans-serif;
-        font-size: 17px;
+        font-size: 16px;
         color: #94a3b8;
         letter-spacing: 0.04em;
         opacity: 0;
@@ -228,7 +206,6 @@
      ═══════════════════════════════════════════════════════════ -->
     <div id="splash-screen">
       <div class="splash-glow"></div>
-      <div class="splash-grid"></div>
       <div class="splash-content">
         <div class="splash-wrapper" id="splash-wrapper">
           <div class="splash-wordrow" id="splash-wordrow"></div>
@@ -698,9 +675,9 @@
               class="ar-back"
               aria-label="평면도로 돌아가기"
             >
-              ←
+              ← 평면도
             </button>
-            <!-- <div><small></small></div> -->
+            <div><small>BF Manual</small></div>
             <span class="live"><i></i> LIVE</span>
           </header>
           <div class="situation situation-fire">

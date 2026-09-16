@@ -52,7 +52,8 @@ const ICON_PATHS = {
   need_help:
     '<path d="M8 12.5V6a1.5 1.5 0 013 0v5"/><path d="M11 10.5V4.5a1.5 1.5 0 013 0v6"/><path d="M14 10.5V6a1.5 1.5 0 013 0v7"/><path d="M8 11a1.5 1.5 0 00-3 0v3.5A6.5 6.5 0 0011.5 21h1a4.5 4.5 0 004.5-4.5V13"/><path d="M3.5 5.5L2 4M4 2.5L3.5 1"/>',
   // 알 수 없는 key 용 기본 아이콘
-  fallback: '<circle cx="12" cy="6" r="2.5"/><path d="M7 21v-6a5 5 0 0110 0v6"/>',
+  fallback:
+    '<circle cx="12" cy="6" r="2.5"/><path d="M7 21v-6a5 5 0 0110 0v6"/>',
 };
 
 const CHECK_PATH = '<path d="M5 13l4 4L19 7"/>';
@@ -98,10 +99,13 @@ function createCard(profile) {
 
   const iconWrap = document.createElement('div');
   iconWrap.className = ICON_WRAP_OFF;
-  iconWrap.append(createIcon(ICON_PATHS[profile.key] || ICON_PATHS.fallback, 'w-10 h-10', '2'));
+  iconWrap.append(
+    createIcon(ICON_PATHS[profile.key] || ICON_PATHS.fallback, 'w-6 h-6', '2'),
+  );
 
   const check = document.createElement('div');
-  check.className = 'check-icon hidden w-5 h-5 rounded-full bg-brand-neon text-slate-950 items-center justify-center';
+  check.className =
+    'check-icon hidden w-5 h-5 rounded-full bg-brand-neon text-slate-950 items-center justify-center';
   check.append(createIcon(CHECK_PATH, 'w-3 h-3', '3'));
 
   top.append(iconWrap, check);
@@ -112,7 +116,8 @@ function createCard(profile) {
   title.textContent = profile.label || profile.key;
   const hint = document.createElement('p');
   hint.className = 'text-[11px] text-slate-400 mt-1 leading-snug';
-  hint.textContent = DESTINATION_HINT[profile.destination_type] || '안내 목적지 정보 없음';
+  hint.textContent =
+    DESTINATION_HINT[profile.destination_type] || '안내 목적지 정보 없음';
   body.append(title, hint);
 
   card.append(top, body);
@@ -156,7 +161,9 @@ function setAlertMessage(message) {
   if (!strong) {
     alertEl.textContent = `[화재 경보] ${message}`;
   } else {
-    [...alertEl.childNodes].forEach(node => { if (node !== strong) node.remove(); });
+    [...alertEl.childNodes].forEach((node) => {
+      if (node !== strong) node.remove();
+    });
     alertEl.append(document.createTextNode(message));
   }
   alertEl.setAttribute('title', message); // 한 줄로 잘릴 때 전체 문구 확인용
@@ -181,12 +188,17 @@ function syncSelection(s) {
     const check = card.querySelector('.check-icon');
     check.classList.toggle('hidden', !on);
     check.classList.toggle('flex', on);
-    card.querySelector('.icon-wrap').className = on ? ICON_WRAP_ON : ICON_WRAP_OFF;
+    card.querySelector('.icon-wrap').className = on
+      ? ICON_WRAP_ON
+      : ICON_WRAP_OFF;
   }
 
   // 로빙 tabindex: 선택된 카드(없으면 첫 카드)만 Tab 순서에 들어간다
-  const focusable = cards.find(card => card.dataset.key === selectedKey) || cards[0];
-  cards.forEach(card => card.setAttribute('tabindex', card === focusable ? '0' : '-1'));
+  const focusable =
+    cards.find((card) => card.dataset.key === selectedKey) || cards[0];
+  cards.forEach((card) =>
+    card.setAttribute('tabindex', card === focusable ? '0' : '-1'),
+  );
 
   confirmBtn.disabled = !selectedKey;
 }
@@ -194,11 +206,15 @@ function syncSelection(s) {
 function syncAlert(s) {
   const scenario = currentScenario();
   if (!scenario) {
-    console.error(`[screen1] 시나리오 '${s.scenarioKey}' 를 응답에서 찾을 수 없습니다.`);
+    console.error(
+      `[screen1] 시나리오 '${s.scenarioKey}' 를 응답에서 찾을 수 없습니다.`,
+    );
     setAlertMessage(ALERT_FAILED);
     return;
   }
-  setAlertMessage(scenario.origin ? `${scenario.name} — ${scenario.origin}` : scenario.name);
+  setAlertMessage(
+    scenario.origin ? `${scenario.name} — ${scenario.origin}` : scenario.name,
+  );
 }
 
 subscribe(['screen'], syncScreen);
@@ -207,7 +223,7 @@ subscribe(['scenarios', 'scenarioKey'], syncAlert);
 
 /* ───────── 입력 처리 (이벤트 위임 1회) ───────── */
 
-gridEl.addEventListener('click', event => {
+gridEl.addEventListener('click', (event) => {
   if (event.target.closest('[data-action="retry-mobility"]')) {
     loadProfiles();
     return;
@@ -216,7 +232,7 @@ gridEl.addEventListener('click', event => {
   if (card) selectMobility(card.dataset.key);
 });
 
-gridEl.addEventListener('keydown', event => {
+gridEl.addEventListener('keydown', (event) => {
   const card = event.target.closest('[role="radio"][data-key]');
   if (!card) return;
 
@@ -227,11 +243,14 @@ gridEl.addEventListener('keydown', event => {
   }
 
   // 라디오 그룹 관례: 방향키로 이동하면서 선택
-  const step = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[event.key];
+  const step = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[
+    event.key
+  ];
   if (!step) return;
   event.preventDefault();
   const cards = [...gridEl.querySelectorAll('[role="radio"][data-key]')];
-  const next = cards[(cards.indexOf(card) + step + cards.length) % cards.length];
+  const next =
+    cards[(cards.indexOf(card) + step + cards.length) % cards.length];
   selectMobility(next.dataset.key);
   next.focus();
 });
@@ -254,7 +273,9 @@ async function loadProfiles() {
     renderCards(profiles);
   } catch (err) {
     console.error('[screen1] 이동 상태 목록을 불러오지 못했습니다.', err);
-    renderGridMessage('이동 상태 목록을 불러오지 못했습니다.', { withRetry: true });
+    renderGridMessage('이동 상태 목록을 불러오지 못했습니다.', {
+      withRetry: true,
+    });
   }
 }
 
