@@ -14,12 +14,20 @@
  *   - 카메라·센서·장애물 모델이 실패해도 안내 화면은 유지한다.
  *   - #screen3 의 .active 토글은 이 파일만 한다.
  *
+ * 카메라 권한은 메인 화면에서 받는다. 이 화면은 권한을 묻지 않는다.
  * 카메라는 HTTPS 또는 localhost 에서만 동작한다.
  * (안드로이드: USB 연결 → PC 크롬 chrome://inspect → Port forwarding 5000)
  */
 
 import { advanceDistance, largeObstacle } from '../ar-core.js';
-import { SCREEN, getState, subscribe, goScreen, hasRoute, currentScenario } from '../state.js';
+import {
+  SCREEN,
+  getState,
+  subscribe,
+  goScreen,
+  hasRoute,
+  currentScenario,
+} from '../state.js';
 
 const $ = (s) => document.querySelector(s);
 const screenEl = document.getElementById('screen3');
@@ -33,19 +41,66 @@ const FLOOR_META = {
   '3f': ['3층', 'ar/assets/floor-3.webp'],
 };
 const DEFAULT_ROUTES = {
-  b1: [[45, 65], [53, 63]],
-  '1f': [[45, 58], [73, 59], [89, 49], [92, 41]],
-  '2f': [[43, 61], [43, 66], [52, 66]],
-  '3f': [[38, 66], [38, 78], [24, 78], [20, 50], [20.5, 26]],
+  b1: [
+    [45, 65],
+    [53, 63],
+  ],
+  '1f': [
+    [45, 58],
+    [73, 59],
+    [89, 49],
+    [92, 41],
+  ],
+  '2f': [
+    [43, 61],
+    [43, 66],
+    [52, 66],
+  ],
+  '3f': [
+    [38, 66],
+    [38, 78],
+    [24, 78],
+    [20, 50],
+    [20.5, 26],
+  ],
 };
-const EXIT_NAMES = { b1: '중앙 비상구', '1f': '동북쪽 비상구', '2f': '중앙 비상구 2', '3f': '서북쪽 비상구' };
+const EXIT_NAMES = {
+  b1: '중앙 비상구',
+  '1f': '동북쪽 비상구',
+  '2f': '중앙 비상구 2',
+  '3f': '서북쪽 비상구',
+};
 
 // 원본의 걸음 인식 프로파일. 키를 state.js 의 mobility 키와 맞춘다.
 const PROFILES = {
-  independent: { distance: 0.7, minDelta: 1.8, maxDelta: 7, cooldown: 380, label: '보행 이동' },
-  walking_aid: { distance: 0.4, minDelta: 1.15, maxDelta: 6, cooldown: 600, label: '보행 보조 이동' },
-  wheelchair: { distance: 0.3, minDelta: 0.65, maxDelta: 4.5, cooldown: 520, label: '휠체어 이동' },
-  need_help: { distance: 0.25, minDelta: 0.9, maxDelta: 5, cooldown: 750, label: '도움 필요 이동' },
+  independent: {
+    distance: 0.7,
+    minDelta: 1.8,
+    maxDelta: 7,
+    cooldown: 380,
+    label: '보행 이동',
+  },
+  walking_aid: {
+    distance: 0.4,
+    minDelta: 1.15,
+    maxDelta: 6,
+    cooldown: 600,
+    label: '보행 보조 이동',
+  },
+  wheelchair: {
+    distance: 0.3,
+    minDelta: 0.65,
+    maxDelta: 4.5,
+    cooldown: 520,
+    label: '휠체어 이동',
+  },
+  need_help: {
+    distance: 0.25,
+    minDelta: 0.9,
+    maxDelta: 5,
+    cooldown: 750,
+    label: '도움 필요 이동',
+  },
 };
 
 /* ───────── 화면 진입마다 새로 잡는 값 ───────── */
@@ -92,8 +147,19 @@ function loadFromState() {
   stepDistance = key === 'wheelchair' || key === 'need_help' ? 0.3 : 0.7;
 
   const v = [route[1][0] - route[0][0], route[1][1] - route[0][1]];
-  targetBearing = (Math.atan2(v[0], -v[1]) * 180 / Math.PI + 360) % 360;
-  total = Math.max(1, Math.round(route.slice(1).reduce((sum, p, i) => sum + Math.hypot(p[0] - route[i][0], p[1] - route[i][1]), 0)));
+  targetBearing = ((Math.atan2(v[0], -v[1]) * 180) / Math.PI + 360) % 360;
+  total = Math.max(
+    1,
+    Math.round(
+      route
+        .slice(1)
+        .reduce(
+          (sum, p, i) =>
+            sum + Math.hypot(p[0] - route[i][0], p[1] - route[i][1]),
+          0,
+        ),
+    ),
+  );
   remaining = total;
   rejected = [];
   locationLabel = start ? start.name : `${FLOOR_META[floor][0]}`;
@@ -102,13 +168,18 @@ function loadFromState() {
 /* ───────── 렌더링 ───────── */
 
 function pointAt(percent) {
-  const lengths = route.slice(1).map((p, i) => Math.hypot(p[0] - route[i][0], p[1] - route[i][1]));
-  const goal = lengths.reduce((a, b) => a + b, 0) * percent / 100;
+  const lengths = route
+    .slice(1)
+    .map((p, i) => Math.hypot(p[0] - route[i][0], p[1] - route[i][1]));
+  const goal = (lengths.reduce((a, b) => a + b, 0) * percent) / 100;
   let walked = 0;
   for (let i = 0; i < lengths.length; i++) {
     if (walked + lengths[i] >= goal) {
       const t = (goal - walked) / (lengths[i] || 1);
-      return [route[i][0] + (route[i + 1][0] - route[i][0]) * t, route[i][1] + (route[i + 1][1] - route[i][1]) * t];
+      return [
+        route[i][0] + (route[i + 1][0] - route[i][0]) * t,
+        route[i][1] + (route[i + 1][1] - route[i][1]) * t,
+      ];
     }
     walked += lengths[i];
   }
@@ -135,9 +206,12 @@ function render() {
   $('#exitDot').setAttribute('cy', route.at(-1)[1]);
   $('#walker').style.left = `${point[0]}%`;
   $('#walker').style.top = `${point[1]}%`;
-  $('#progress').textContent = pct >= 100 ? '비상구 도착' : pct > 0 ? '대피 이동 중' : '출발 지점';
+  $('#progress').textContent =
+    pct >= 100 ? '비상구 도착' : pct > 0 ? '대피 이동 중' : '출발 지점';
   $('#remaining').textContent = `약 ${Math.ceil(remaining)}m 남음`;
-  $('#history').textContent = rejected.length ? `제외된 경로 ${rejected.length}개` : '제외된 경로 없음';
+  $('#history').textContent = rejected.length
+    ? `제외된 경로 ${rejected.length}개`
+    : '제외된 경로 없음';
   $('#resetButton').disabled = !rejected.length;
 }
 
@@ -159,79 +233,91 @@ function speak(text, force = false) {
 
 /* ───────── 카메라 ───────── */
 
-function cameraPriority(label = '') {
-  if (/(back|rear|environment|후면|뒷면|wide|광각)/i.test(label)) return 3;
-  if (/(front|user|전면|selfie)/i.test(label)) return 0;
-  return 1;
+/**
+ * 카메라 권한은 메인 화면에서 미리 받는다.
+ * 이 화면에서는 권한을 묻지 않고, 이미 허용된 경우에만 후면 카메라를 바로 켠다.
+ *   - 허용됨        → 즉시 후면 카메라 연결
+ *   - 아직 안 물어봄 → 권한 창을 띄우지 않고 시뮬레이션 배경으로 안내 계속
+ *   - 거부됨        → 동일하게 시뮬레이션 배경으로 안내 계속
+ */
+async function cameraPermission() {
+  try {
+    const status = await navigator.permissions.query({ name: 'camera' });
+    return status.state; // 'granted' | 'prompt' | 'denied'
+  } catch {
+    return 'unknown'; // Permissions API 미지원 브라우저
+  }
 }
 
-/** 후면 카메라 중 손전등을 지원하는 카메라를 우선 선택 (원본 로직) */
-async function selectTorchCamera() {
-  const constraints = { width: { ideal: 1280 }, height: { ideal: 720 } };
-  let first = await navigator.mediaDevices.getUserMedia({ video: { ...constraints, facingMode: { ideal: 'environment' } }, audio: false });
-  let track = first.getVideoTracks()[0];
-  if (track.getCapabilities?.().torch) return { stream: first, torch: true, label: track.label };
-
-  const devices = (await navigator.mediaDevices.enumerateDevices())
-    .filter((d) => d.kind === 'videoinput')
-    .sort((a, b) => cameraPriority(b.label) - cameraPriority(a.label));
-  first.getTracks().forEach((t) => t.stop());
-
-  for (const device of devices) {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: { ...constraints, deviceId: { exact: device.deviceId } }, audio: false });
-      const candidate = stream.getVideoTracks()[0];
-      if (candidate.getCapabilities?.().torch) return { stream, torch: true, label: candidate.label };
-      stream.getTracks().forEach((t) => t.stop());
-    } catch { /* 다음 카메라 시도 */ }
+/** 후면 카메라 1회 요청. 후면을 강제하고, 없으면 기본 카메라(PC 테스트용). */
+async function openRearCamera() {
+  const size = { width: { ideal: 1280 }, height: { ideal: 720 } };
+  try {
+    return await navigator.mediaDevices.getUserMedia({
+      video: { ...size, facingMode: { exact: 'environment' } },
+      audio: false,
+    });
+  } catch (err) {
+    if (err.name === 'NotAllowedError' || err.name === 'SecurityError')
+      throw err;
+    return navigator.mediaDevices.getUserMedia({
+      video: { ...size, facingMode: { ideal: 'environment' } },
+      audio: false,
+    });
   }
-
-  first = await navigator.mediaDevices.getUserMedia({ video: { ...constraints, facingMode: { ideal: 'environment' } }, audio: false });
-  track = first.getVideoTracks()[0];
-  return { stream: first, torch: !!track.getCapabilities?.().torch, label: track.label };
 }
 
 async function startCamera() {
   if (cameraStream) return;
   if (!window.isSecureContext || !navigator.mediaDevices?.getUserMedia) {
-    $('#message').textContent = '보안 연결(HTTPS/localhost)이 아니라 카메라를 쓸 수 없습니다.';
+    $('#message').textContent =
+      '보안 연결(HTTPS/localhost)이 아니라 시뮬레이션 화면으로 안내합니다.';
     return;
   }
+
+  const permission = await cameraPermission();
+  if (permission === 'prompt' || permission === 'denied') {
+    // 여기서 권한 창을 띄우지 않는다
+    $('#message').textContent =
+      '카메라 없이 안내합니다. 화살표 방향으로 이동하세요.';
+    return;
+  }
+
   try {
-    const selected = await selectTorchCamera();
+    const stream = await openRearCamera();
     // 카메라를 기다리는 사이 화면을 벗어났으면 바로 끈다
-    if (getState().screen !== SCREEN.AR) {
-      selected.stream.getTracks().forEach((t) => t.stop());
+    if (!isActive()) {
+      stream.getTracks().forEach((t) => t.stop());
       return;
     }
-    cameraStream = selected.stream;
-    $('#arCamera').srcObject = cameraStream;
-    await $('#arCamera').play().catch(() => {});
-    $('#torchButton').disabled = !selected.torch;
-    $('#message').textContent = selected.torch
-      ? `손전등 지원 카메라 연결됨${selected.label ? ` · ${selected.label}` : ''}`
-      : '후면 카메라 연결됨 · 손전등 미지원';
+    cameraStream = stream;
+    const video = $('#arCamera');
+    video.srcObject = stream;
+    video.muted = true;
+    video.setAttribute('playsinline', '');
+    await video.play().catch(() => {});
+
+    const track = stream.getVideoTracks()[0];
+    const hasTorch = !!track.getCapabilities?.().torch;
+    $('#torchButton').disabled = !hasTorch;
+    $('#message').textContent = hasTorch
+      ? '후면 카메라 연결됨 · 손전등 사용 가능'
+      : '후면 카메라 연결됨';
     startVision();
-  } catch (e) {
-    $('#message').textContent = e.name === 'NotAllowedError' ? '카메라 권한을 허용해주세요.' : '후면 카메라를 시작할 수 없습니다.';
+  } catch {
+    $('#message').textContent =
+      '카메라 없이 안내합니다. 화살표 방향으로 이동하세요.';
   }
 }
 
 /* ───────── 방향·걸음 센서 ───────── */
 
-async function startSensors() {
+/** 안드로이드 크롬은 센서 권한 창이 없으므로 바로 구독한다. (권한 요청 없음) */
+function startSensors() {
   if (sensorsBound) return;
-  try {
-    const requests = [];
-    if (typeof DeviceOrientationEvent?.requestPermission === 'function') requests.push(DeviceOrientationEvent.requestPermission());
-    if (typeof DeviceMotionEvent?.requestPermission === 'function') requests.push(DeviceMotionEvent.requestPermission());
-    if ((await Promise.all(requests)).some((x) => x !== 'granted')) throw Error();
-    window.addEventListener('deviceorientation', onOrientation, true);
-    window.addEventListener('devicemotion', onMotion, true);
-    sensorsBound = true;
-  } catch {
-    $('#message').textContent = '브라우저에서 동작 및 방향 센서 권한을 허용해주세요.';
-  }
+  window.addEventListener('deviceorientation', onOrientation, true);
+  window.addEventListener('devicemotion', onMotion, true);
+  sensorsBound = true;
 }
 
 function isActive() {
@@ -243,13 +329,27 @@ function onOrientation(e) {
   heading = e.webkitCompassHeading ?? (e.alpha == null ? null : 360 - e.alpha);
   if (heading == null) return;
   const rotation = ((targetBearing - heading + 540) % 360) - 180;
-  const mode = Math.abs(rotation) < 45 ? 'forward'
-    : rotation >= 45 && rotation < 135 ? 'right'
-    : rotation <= -45 && rotation > -135 ? 'left' : 'back';
-  const labels = { forward: '앞으로', right: '오른쪽', left: '왼쪽', back: '반대 방향' };
+  const mode =
+    Math.abs(rotation) < 45
+      ? 'forward'
+      : rotation >= 45 && rotation < 135
+        ? 'right'
+        : rotation <= -45 && rotation > -135
+          ? 'left'
+          : 'back';
+  const labels = {
+    forward: '앞으로',
+    right: '오른쪽',
+    left: '왼쪽',
+    back: '반대 방향',
+  };
   $('#arrow').className = `arrow ${mode}`;
-  $('#direction').textContent = mode === 'forward' ? '앞으로 직진하세요'
-    : mode === 'back' ? '반대편으로 돌아서세요' : `${labels[mode]}으로 방향을 맞추세요`;
+  $('#direction').textContent =
+    mode === 'forward'
+      ? '앞으로 직진하세요'
+      : mode === 'back'
+        ? '반대편으로 돌아서세요'
+        : `${labels[mode]}으로 방향을 맞추세요`;
 }
 
 function onMotion(e) {
@@ -260,16 +360,30 @@ function onMotion(e) {
   const delta = Math.abs(magnitude - lastMagnitude);
   const now = Date.now();
   lastMagnitude = magnitude;
-  if (delta <= profile.minDelta || delta >= profile.maxDelta || now - lastStep <= profile.cooldown) return;
+  if (
+    delta <= profile.minDelta ||
+    delta >= profile.maxDelta ||
+    now - lastStep <= profile.cooldown
+  )
+    return;
   lastStep = now;
 
-  const result = advanceDistance(remaining, { currentHeading: heading, target: targetBearing, step: profile.distance });
+  const result = advanceDistance(remaining, {
+    currentHeading: heading,
+    target: targetBearing,
+    step: profile.distance,
+  });
   if (result.reason !== 'advanced') {
-    $('#message').textContent = result.reason === 'wrong-direction' ? '화살표 방향으로 돌아서세요.' : '방향 센서를 확인하고 있습니다.';
+    $('#message').textContent =
+      result.reason === 'wrong-direction'
+        ? '화살표 방향으로 돌아서세요.'
+        : '방향 센서를 확인하고 있습니다.';
     return;
   }
   remaining = result.distance;
-  $('#message').textContent = blocked ? '장애물이 감지되었습니다. 통과 여부를 확인하세요.' : `${profile.label} · 올바른 방향으로 이동 중`;
+  $('#message').textContent = blocked
+    ? '장애물이 감지되었습니다. 통과 여부를 확인하세요.'
+    : `${profile.label} · 올바른 방향으로 이동 중`;
   render();
   if (!remaining) {
     $('#direction').textContent = '안전한 비상구에 도착했습니다.';
@@ -286,7 +400,7 @@ async function startVision() {
     return;
   }
   try {
-    model = model || await window.cocoSsd.load({ base: 'lite_mobilenet_v2' });
+    model = model || (await window.cocoSsd.load({ base: 'lite_mobilenet_v2' }));
     if (!isActive()) return;
     $('#obstacleStatus').textContent = '대형 장애물 자동 인식 중';
     visionTimer = setInterval(detect, 1100);
@@ -301,7 +415,9 @@ async function detect() {
   busy = true;
   try {
     const items = await model.detect(video, 8, 0.55);
-    const hits = items.filter((x) => largeObstacle(x, video.videoWidth, video.videoHeight));
+    const hits = items.filter((x) =>
+      largeObstacle(x, video.videoWidth, video.videoHeight),
+    );
     blocked = hits.length > 0;
     $('#arScreen').classList.toggle('blocked', blocked);
     $('#obstacleStatus').classList.toggle('detected', blocked);
@@ -355,7 +471,10 @@ function setSignal(on) {
     rescueBeep();
     speak('도움이 필요합니다. 사람이 있습니다.', true);
     signalBeep = setInterval(rescueBeep, 1400);
-    signalVoice = setInterval(() => speak('도움이 필요합니다. 사람이 있습니다.', true), 6000);
+    signalVoice = setInterval(
+      () => speak('도움이 필요합니다. 사람이 있습니다.', true),
+      6000,
+    );
   } else {
     navigator.vibrate?.(0);
   }
@@ -436,7 +555,8 @@ $('#signalButton').addEventListener('click', () => setSignal(!signal));
 
 $('#detourButton').addEventListener('click', () => {
   rejected.push($('#exitName').textContent);
-  $('#message').textContent = '현재 경로를 제외했습니다. 새 경로 데이터가 필요합니다.';
+  $('#message').textContent =
+    '현재 경로를 제외했습니다. 새 경로 데이터가 필요합니다.';
   render();
 });
 $('#resetButton').addEventListener('click', () => {
@@ -451,7 +571,9 @@ document.addEventListener('keydown', (e) => {
 document.addEventListener('visibilitychange', () => {
   if (!isActive()) return;
   if (document.hidden) leave();
-  else { startCamera(); }
+  else {
+    startCamera();
+  }
 });
 window.addEventListener('pagehide', leave);
 
