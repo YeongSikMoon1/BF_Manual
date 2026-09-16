@@ -9,7 +9,7 @@
  *   - #screen2 의 .active 토글은 이 파일만 한다. 다른 화면 섹션은 건드리지 않는다.
  *   - no_route 는 오류가 아니다. 구조 대기 안내를 보여주는 정상 흐름이다.
  *   - 순서: 경로를 먼저 그리고, 행동요령(/api/guide)은 나중에 채운다.
- *   - 도움 요청은 미리보기까지만. 실제 전송하지 않고, 개인정보를 받지 않는다.
+ *   - 도움 요청은 미리보기 후 기기의 문자 앱으로 전달할 수 있다.
  */
 
 import {
@@ -84,6 +84,7 @@ const helpModal = $('help-modal');
 const helpTextEl = $('help-text');
 const helpCloseBtn = $('btn-help-close');
 const helpCopyBtn = $('btn-help-copy');
+const helpKakaoBtn = $('btn-help-kakao');
 const toastEl = $('toast');
 
 // screen1 과 같은 이동 상태 아이콘 (고정 상수, stroke + currentColor)
@@ -470,6 +471,28 @@ async function copyHelpText() {
   }
 }
 
+function sendHelpKakao() {
+  const text = helpTextEl.textContent.trim();
+  if (!text) {
+    showToast('전달할 도움 요청 내용이 없습니다.');
+    return;
+  }
+
+  if (!window.Kakao?.isInitialized?.()) {
+    showToast('카카오톡 공유 설정이 아직 완료되지 않았습니다.');
+    return;
+  }
+
+  window.Kakao.Share.sendDefault({
+    objectType: 'text',
+    text,
+    link: {
+      mobileWebUrl: window.location.href,
+      webUrl: window.location.href,
+    },
+  });
+}
+
 /* ───────── 이벤트 등록 ───────── */
 
 badgeBtn.addEventListener('click', () => goScreen(SCREEN.MOBILITY));
@@ -478,6 +501,7 @@ startArBtn.addEventListener('click', () => goScreen(SCREEN.AR)); // AR 로직은
 helpBtn.addEventListener('click', handleHelp);
 helpCloseBtn.addEventListener('click', () => closeHelpModal());
 helpCopyBtn.addEventListener('click', copyHelpText);
+helpKakaoBtn.addEventListener('click', sendHelpKakao);
 helpModal.addEventListener('click', event => {
   if (event.target === helpModal) closeHelpModal(); // 배경 클릭으로 닫기
 });
