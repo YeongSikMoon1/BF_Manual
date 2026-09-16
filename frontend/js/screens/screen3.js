@@ -276,12 +276,13 @@ async function startCamera() {
   }
 
   const permission = await cameraPermission();
-  if (permission === 'prompt' || permission === 'denied') {
-    // 여기서 권한 창을 띄우지 않는다
-    $('#message').textContent =
-      '카메라 없이 안내합니다. 화살표 방향으로 이동하세요.';
+  if (permission === 'denied') {
+    // 사용자가 거부한 경우에는 다시 묻지 않는다
+    $('#message').textContent = '카메라 권한이 거부되어 카메라 없이 안내합니다.';
     return;
   }
+  // 'prompt'(아직 허용 전)이면 브라우저가 권한 창을 한 번만 띄운다.
+  // 메인 화면에서 미리 허용받으면 여기서는 창이 뜨지 않는다.
 
   try {
     const stream = await openRearCamera();
