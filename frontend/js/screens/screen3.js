@@ -316,7 +316,13 @@ async function startCamera() {
 /** 안드로이드 크롬은 센서 권한 창이 없으므로 바로 구독한다. (권한 요청 없음) */
 function startSensors() {
   if (sensorsBound) return;
-  window.addEventListener('deviceorientation', onOrientation, true);
+  // 안드로이드: deviceorientationabsolute 가 실제 나침(북쪽 기준) 값을 준다.
+  // 일반 deviceorientation 은 켤 때 방향이 0 이라 목표 방위와 비교할 수 없다.
+  if ('ondeviceorientationabsolute' in window) {
+    window.addEventListener('deviceorientationabsolute', onOrientation, true);
+  } else {
+    window.addEventListener('deviceorientation', onOrientation, true);
+  }
   window.addEventListener('devicemotion', onMotion, true);
   sensorsBound = true;
 }
@@ -325,26 +331,45 @@ function isActive() {
   return getState().screen === SCREEN.AR;
 }
 
+/** 화면 방향(세로/가로)에 따른 보정 각도 */
+function screenAngle() {
+  return (screen.orientation && screen.orientation.angle) || window.orientation || 0;
+}
+
+let smoothTurn = null; // 흔들림을 줄인 화살표 회전값(도)
+
 function onOrientation(e) {
   if (!isActive()) return;
-  heading = e.webkitCompassHeading ?? (e.alpha == null ? null : 360 - e.alpha);
-  if (heading == null) return;
+  const raw = e.webkitCompassHeading ?? (e.alpha == null ? null : 360 - e.alpha);
+  if (raw == null) return;
+  heading = (raw + screenAngle() + 360) % 360;
+
+  // 목표 방위와 현재 바라보는 방향의 차이 (-180 ~ 180, 오른쪽이 +)
   const rotation = ((targetBearing - heading + 540) % 360) - 180;
+
+  // 급격한 튐 방지: 이전 값에 조금씩 따라가게 한다 (360↔0 경계 처리 포함)
+  if (smoothTurn == null) smoothTurn = rotation;
+  const diff = ((rotation - smoothTurn + 540) % 360) - 180;
+  smoothTurn = ((smoothTurn + diff * 0.25 + 540) % 360) - 180;
+
   const mode =
-    Math.abs(rotation) < 45
+    Math.abs(smoothTurn) < 30
       ? 'forward'
-      : rotation >= 45 && rotation < 135
+      : smoothTurn >= 30 && smoothTurn < 135
         ? 'right'
-        : rotation <= -45 && rotation > -135
+        : smoothTurn <= -30 && smoothTurn > -135
           ? 'left'
           : 'back';
-  const labels = {
-    forward: '앞으로',
-    right: '오른쪽',
-    left: '왼쪽',
-    back: '반대 방향',
-  };
-  $('#arrow').className = `arrow ${mode}`;
+
+  // 화살표: 뒤돌기가 아니면 목표 방향으로 실제 각도만큼 회전
+  const arrow = $('#arrow');
+  arrow.className = mode === 'back' ? 'arrow back' : 'arrow forward';
+  screenEl.style.setProperty('--ar-turn', mode === 'back' ? '0deg' : `${smoothTurn.toFixed(1)}deg`);
+
+  const labels = { right: '오른쪽', left: '왼쪽' };
+  const icons = { forward: '⬆', right: '↱', left: '↰', back: '↶' };
+  const icon = document.querySelector('#screen3 .direction-icon');
+  if (icon) icon.textContent = icons[mode];
   $('#direction').textContent =
     mode === 'forward'
       ? '앞으로 직진하세요'

@@ -2182,3 +2182,19 @@
 #screen3 .ar-screen > header .live {
   margin-left: auto;
 }
+
+/* ==========================================================================
+   화살표 회전
+   원본 규칙에 .arrow { transform: none !important } 가 있어 방향 클래스가
+   바뀌어도 화살표가 돌지 않았다. 화살표를 감싼 .arrow-wrap 을 JS 가 넣는
+   --ar-turn 각도만큼 회전시킨다. (.arrow 자체 규칙은 건드리지 않음)
+   ========================================================================== */
+#screen3 .arrow-wrap {
+  transform: rotate(var(--ar-turn, 0deg));
+  transform-origin: 50% 70%;
+  /* 흔들림 보정은 JS(smoothTurn)에서 하므로 transition 없음 */
+  will-change: transform;
+}
+@media (max-height: 700px) {
+  #screen3 .arrow-wrap { transform: rotate(var(--ar-turn, 0deg)) scale(0.82); }
+}
