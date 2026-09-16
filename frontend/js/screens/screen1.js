@@ -255,8 +255,30 @@ gridEl.addEventListener('keydown', (event) => {
   next.focus();
 });
 
+/**
+ * AR 카메라 권한을 미리 받는다.
+ * 브라우저 규칙상 권한 요청은 버튼 클릭 같은 사용자 동작 안에서만 가능하므로
+ * '다음' 버튼에서 한 번 요청한다. 권한만 받고 카메라는 바로 끈다.
+ * 거부하거나 실패해도 앱 흐름은 막지 않는다. (AR 화면은 카메라 없이도 안내)
+ */
+async function requestCameraPermissionOnce() {
+  try {
+    if (!window.isSecureContext || !navigator.mediaDevices?.getUserMedia) return;
+    const status = await navigator.permissions?.query({ name: 'camera' }).catch(() => null);
+    if (status && status.state !== 'prompt') return; // 이미 허용 또는 거부됨
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: { ideal: 'environment' } },
+      audio: false,
+    });
+    stream.getTracks().forEach((t) => t.stop());
+  } catch (err) {
+    console.info('[screen1] 카메라 권한을 받지 못했습니다. AR 은 카메라 없이 안내합니다.', err?.name);
+  }
+}
+
 confirmBtn.addEventListener('click', () => {
   if (!getState().mobility) return;
+  requestCameraPermissionOnce(); // 기다리지 않는다: 권한 창이 떠 있어도 화면은 넘어간다
   goScreen(SCREEN.PLAN);
 });
 
