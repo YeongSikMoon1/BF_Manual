@@ -11,7 +11,12 @@
  *       #layer-nodes  노드 도형 + 이름 + 현재지점 표시
  *       #layer-hazard 차단 / 연기 표시
  *
- * 좌표: viewBox "0 0 100 100" 이므로 노드 x,y(0~100)를 그대로 쓴다. 크기 단위도 viewBox 단위다.
+ * 좌표: 노드 x,y 는 0~100.
+ *   - 이미지 없음: viewBox "0 0 100 100", 좌표 그대로 사용.
+ *   - 평면도 이미지 있음(building.floor_images): 노드 x,y 는 '이미지 기준 %' 이다.
+ *     viewBox 를 "0 0 100 (100×세로/가로)" 로 바꾸고 y 에 같은 비율(yScale)을 곱해 이미지 위에 겹친다.
+ *     이미지에 방·계단·비상구가 그려져 있으므로 복도선/복도점/계단/비상구 도형은 생략하고
+ *     방은 투명한 탭 영역 + 선택 강조만, 대피공간(이미지에 없음)만 도형으로 그린다.
  *
  * 호출 순서 (층을 그린 뒤 위치를 참조하는 함수들이 따라온다):
  *   renderFloor → renderHazard → renderPath → markStart
@@ -58,6 +63,12 @@ const LABEL_HALO = {
 
 // 유일한 내부 캐시: 직전에 그린 경로의 points 문자열
 let lastPathPoints = null;
+// 현재 층 표시 방식 (renderFloor 가 정한다). 이미지 모드면 y 에 yScale 을 곱한다.
+let yScale = 1;
+let imageMode = false;
+
+const ROOM_W_IMG = 6;
+const ROOM_H_IMG = 5.4;
 
 /* ───────── 내부 도우미 ───────── */
 
@@ -85,9 +96,12 @@ function createText(parent, content, attrs) {
 const hasPoint = node =>
   node != null && Number.isFinite(Number(node.x)) && Number.isFinite(Number(node.y));
 
+/** 화면 좌표로 변환 (이미지 모드면 세로 비율 보정) */
+const px = node => ({ x: Number(node.x), y: Number(node.y) * yScale });
+
 /** 좌표가 있는 노드만 순서 그대로 이어 points 문자열로 만든다. 2점 미만이면 ''. */
 function toPointsAttr(pathNodes) {
-  const points = (pathNodes || []).filter(hasPoint).map(n => `${Number(n.x)},${Number(n.y)}`);
+  const points = (pathNodes || []).filter(hasPoint).map(n => { const p = px(n); return `${p.x},${p.y}`; });
   return points.length >= 2 ? points.join(' ') : '';
 }
 
@@ -110,6 +124,24 @@ function readNodePositions() {
 function drawRoom(group, node, x, y) {
   const label = node.name || node.id;
   const isLong = [...label].length > 5;
+
+  if (imageMode) {
+    // 이미지에 방 이름이 있으므로 투명 강조 틀 + 탭 영역만 그린다
+    createSvg('rect', {
+      class: 'room-shape',
+      x: x - ROOM_W_IMG / 2, y: y - ROOM_H_IMG / 2, width: ROOM_W_IMG, height: ROOM_H_IMG, rx: 0.8,
+      fill: 'transparent', stroke: 'transparent', 'stroke-width': ROOM_STROKE_WIDTH,
+    }, group);
+    createSvg('rect', {
+      class: 'room-hit',
+      'data-node-id': node.id,
+      x: x - ROOM_W_IMG / 2, y: y - ROOM_H_IMG / 2, width: ROOM_W_IMG, height: ROOM_H_IMG,
+      tabindex: 0,
+      role: 'button',
+      'aria-label': `${label} 선택`,
+    }, group);
+    return;
+  }
 
   createSvg('rect', {
     class: 'room-shape',
@@ -187,8 +219,7 @@ function drawExit(group, x, y) {
 }
 
 function drawNode(parent, node) {
-  const x = Number(node.x);
-  const y = Number(node.y);
+  const { x, y } = px(node);
   const group = createSvg('g', {
     'data-node-id': node.id,
     'data-type': node.type,
@@ -197,6 +228,7 @@ function drawNode(parent, node) {
   }, parent);
   createSvg('title', {}, group).textContent = node.name || node.id;
 
+  if (imageMode && node.type !== 'room' && node.type !== 'refuge') return; // 이미지에 이미 있음
   switch (node.type) {
     case 'room': drawRoom(group, node, x, y); break;
     case 'stair': drawStair(group, node, x, y); break;
@@ -233,16 +265,34 @@ export function initFloorplan({ onSelectRoom } = {}) {
 }
 
 /** 해당 층의 노드·엣지만 그린다. 호출할 때마다 엣지/노드 레이어를 비우고 다시 그린다. */
-export function renderFloor({ nodes = [], edges = [], floor }) {
+export function renderFloor({ nodes = [], edges = [], floor, image = null }) {
+  const svg = getLayer('floorplan');
   const edgeLayer = getLayer('layer-edges');
   const nodeLayer = getLayer('layer-nodes');
   edgeLayer.replaceChildren();
   nodeLayer.replaceChildren();
 
+  // 평면도 이미지 배경
+  imageMode = !!(image && image.src && image.width && image.height);
+  yScale = imageMode ? image.height / image.width : 1;
+  svg.setAttribute('viewBox', `0 0 100 ${100 * yScale}`);
+  let bg = svg.querySelector('image.floor-image');
+  if (imageMode) {
+    if (!bg) {
+      bg = createSvg('image', { class: 'floor-image', x: 0, y: 0, 'pointer-events': 'none' });
+      svg.insertBefore(bg, edgeLayer); // 모든 레이어보다 아래
+    }
+    bg.setAttribute('href', image.src);
+    bg.setAttribute('width', 100);
+    bg.setAttribute('height', 100 * yScale);
+  } else if (bg) {
+    bg.remove();
+  }
+
   const floorNodes = nodes.filter(n => Number(n.floor) === Number(floor) && hasPoint(n));
   const byId = new Map(floorNodes.map(n => [n.id, n]));
 
-  for (const edge of edges) {
+  for (const edge of imageMode ? [] : edges) { // 이미지 모드는 복도선을 그리지 않는다
     const a = byId.get(edge.from);
     const b = byId.get(edge.to);
     if (!a || !b) continue;
@@ -371,7 +421,7 @@ export function markStart(nodeId) {
   const y = Number(group.dataset.y);
   const marker = createSvg('g', { class: 'start-marker', 'pointer-events': 'none' }, nodeLayer);
   createSvg('circle', {
-    cx: x, cy: y, r: 9, fill: 'none', stroke: COLORS.start, 'stroke-width': 0.6, opacity: 0.6,
+    cx: x, cy: y, r: imageMode ? 5 : 9, fill: 'none', stroke: COLORS.start, 'stroke-width': 0.6, opacity: 0.6,
   }, marker);
   // 방이 아닌 지점(재탐색 시 복도 등)은 사각형 강조가 없으므로 점을 찍는다
   if (group.dataset.type !== 'room') {

@@ -9,6 +9,7 @@
     <title>BeFirst — BF Manual</title>
 
     <script src="js/vendor/tailwind-play.js"></script>
+    <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js"></script>
     <script>
       // Play CDN 설정 — 빌드 단계가 없으므로 여기서 테마를 확장한다.
       tailwind.config = {
@@ -802,7 +803,10 @@
           class="w-full max-w-[430px] bg-[#0C141F] border-t border-slate-700 rounded-t-3xl p-5 pb-8"
         >
           <div class="w-10 h-1 bg-slate-600 rounded-full mx-auto mb-4"></div>
-          <h2 class="text-lg font-extrabold text-white mb-1">도움 요청 내용</h2>
+          <div class="flex items-center justify-between gap-3 mb-1">
+            <h2 class="text-lg font-extrabold text-white">도움 요청 내용</h2>
+            <button id="btn-help-close" type="button" aria-label="닫기" class="w-9 h-9 rounded-full border border-slate-600 bg-slate-900 text-slate-300 text-xl leading-none active:scale-[.98]">×</button>
+          </div>
           <p class="text-[11px] text-slate-400 mb-3">
             아래 내용을 보호자 또는 관리자에게 전달할 수 있습니다.
           </p>
@@ -812,37 +816,20 @@
             class="whitespace-pre-wrap text-xs leading-relaxed text-slate-200 bg-slate-900/80 border border-slate-700 rounded-xl p-3.5 max-h-[45vh] overflow-y-auto font-sans"
           ></pre>
 
-          <div
-            class="flex items-center gap-1.5 mt-3 px-3 py-2 rounded-lg bg-amber-950/40 border border-amber-700/40"
-          >
-            <svg
-              class="w-3.5 h-3.5 text-amber-400 stroke-current stroke-[2] fill-none flex-shrink-0"
-              viewBox="0 0 24 24"
-            >
-              <path
-                d="M12 9v4m0 4h.01M12 3a9 9 0 100 18 9 9 0 000-18z"
-                stroke-linecap="round"
-              />
-            </svg>
-            <p class="text-[11px] text-amber-200">
-              미리보기입니다. 실제 신고는 119로 해주세요.
-            </p>
-          </div>
-
           <div class="grid grid-cols-2 gap-2.5 mt-4">
-            <button
-              id="btn-help-close"
-              type="button"
-              class="py-3.5 rounded-xl border border-slate-600 bg-slate-900 text-slate-200 font-bold text-sm active:scale-[.98]"
-            >
-              닫기
-            </button>
             <button
               id="btn-help-copy"
               type="button"
               class="py-3.5 rounded-xl bg-brand-neon text-slate-950 font-black text-sm active:scale-[.98]"
             >
               내용 복사
+            </button>
+            <button
+              id="btn-help-kakao"
+              type="button"
+              class="py-3.5 rounded-xl bg-brand-neon text-slate-950 font-black text-sm active:scale-[.98]"
+            >
+              카카오톡 보내기
             </button>
           </div>
         </div>

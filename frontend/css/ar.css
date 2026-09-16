@@ -2182,3 +2182,59 @@
 #screen3 .ar-screen > header .live {
   margin-left: auto;
 }
+
+/* ==========================================================================
+   화살표 회전
+   원본 규칙에 .arrow { transform: none !important } 가 있어 방향 클래스가
+   바뀌어도 화살표가 돌지 않았다. 화살표를 감싼 .arrow-wrap 을 JS 가 넣는
+   --ar-turn 각도만큼 회전시킨다. (.arrow 자체 규칙은 건드리지 않음)
+   ========================================================================== */
+#screen3 .arrow-wrap {
+  transform: rotate(var(--ar-turn, 0deg));
+  transform-origin: 50% 70%;
+  /* 흔들림 보정은 JS(smoothTurn)에서 하므로 transition 없음 */
+  will-change: transform;
+}
+@media (max-height: 700px) {
+  #screen3 .arrow-wrap { transform: rotate(var(--ar-turn, 0deg)) scale(0.82); }
+}
+
+/* ==========================================================================
+   화살표 흐름 애니메이션
+   원본에 .arrow.forward i { transform/opacity: … !important } 가 있어서
+   keyframes(transform·opacity)가 전부 덮여 애니메이션이 안 보였다.
+   → 잠겨 있지 않은 개별 속성(translate, scale)과 filter:opacity() 로 움직인다.
+
+   효과: 화살표 5칸이 한 덩어리처럼 앞으로 흘러가며, 앞쪽 끝에 닿은
+   조각부터 하나씩 사라지고 뒤에서 다시 나타난다. (컨베이어처럼 반복)
+   ========================================================================== */
+@keyframes bf-chevron-flow {
+  0%   { translate: 0 18px;  scale: 1.08; filter: opacity(0); }
+  15%  { translate: 0 8px;   scale: 1.04; filter: opacity(1); }
+  70%  { translate: 0 -22px; scale: 0.92; filter: opacity(0.9); }
+  100% { translate: 0 -40px; scale: 0.8;  filter: opacity(0); }
+}
+#screen3 .arrow.forward i {
+  animation: bf-chevron-flow 1.5s linear infinite !important;
+  transform-origin: 50% 50%;
+}
+/* 뒤(아래) 조각이 먼저 출발하도록 시차를 준다 */
+#screen3 .arrow.forward i:nth-child(1) { animation-delay: 0s !important; }
+#screen3 .arrow.forward i:nth-child(2) { animation-delay: -0.3s !important; }
+#screen3 .arrow.forward i:nth-child(3) { animation-delay: -0.6s !important; }
+#screen3 .arrow.forward i:nth-child(4) { animation-delay: -0.9s !important; }
+#screen3 .arrow.forward i:nth-child(5) { animation-delay: -1.2s !important; }
+
+/* 도착·경로 없음: 화살표를 숨기고 안내 카드만 남긴다 */
+#screen3 .ar-arrived .arrow-wrap,
+#screen3 .ar-no-route .arrow-wrap { visibility: hidden; }
+#screen3 .ar-no-route .direction-icon { border-color: #e11d48; color: #fb7185; }
+#screen3 .ar-no-route .status { display: none; }
+
+/* 저전력·동작 줄이기 설정이어도 방향 흐름은 안내 정보이므로 유지 */
+@media (prefers-reduced-motion: reduce) {
+  #screen3 .arrow.forward i {
+    animation-duration: 1.5s !important;
+    animation-iteration-count: infinite !important;
+  }
+}
