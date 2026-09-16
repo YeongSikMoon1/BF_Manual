@@ -8,7 +8,7 @@ from app.services.mobility import get_profile
 from app.services.pathfinder import find_route
 
 
-def route_for(mobility, events=None, start="F3-R302"):
+def route_for(mobility, events=None, start="F2-R205"):
     hazard = gl.apply_events(gl.get_scenario("demo-1"), events or [])
     return find_route(start, get_profile(mobility), hazard)
 
@@ -23,7 +23,7 @@ def test_wheelchair_goes_to_refuge_on_same_floor():
     r = route_for("wheelchair")
     assert r["status"] == "ok"
     assert r["destination_type"] == "refuge"
-    assert r["destination"]["floor"] == 3
+    assert r["destination"]["floor"] == 2
 
 
 def test_wheelchair_never_uses_stairs():
@@ -60,14 +60,14 @@ def test_never_returns_nothing():
 def test_blocked_nodes_excluded():
     r = route_for("independent")
     ids = [n["id"] for n in r["path"]]
-    assert "F3-STAIR-B" not in ids and "F3-C4" not in ids
+    assert "F2-STAIR-B" not in ids and "F2-C4" not in ids
 
 
 def test_reroute_after_event():
     before = route_for("independent")
     after = route_for("independent", events=["ev-1"])
     assert after["status"] == "ok"
-    assert "F3-C5" not in [n["id"] for n in after["path"]]
+    assert "F2-C5" not in [n["id"] for n in after["path"]]
     assert [n["id"] for n in before["path"]] != [n["id"] for n in after["path"]]
 
 

@@ -34,7 +34,7 @@ const INITIAL = {
   scenarioKey: 'demo-1', // 시연 시나리오 key
   triggeredEvents: [],   // 발생시킨 상황 변화 이벤트 id 목록
   startNodeId: null,     // 평면도에서 탭한 현재 위치 노드 id
-  floor: 3,              // 평면도에 그릴 층
+  floor: 2,              // 평면도에 그릴 층 (시연: 전시동 2층)
 
   // 계산 결과
   route: null,           // POST /api/route | /api/reroute 응답

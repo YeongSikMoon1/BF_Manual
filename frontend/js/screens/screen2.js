@@ -12,12 +12,7 @@
  *   - 도움 요청은 미리보기 후 기기의 문자 앱으로 전달할 수 있다.
  */
 
-import {
-  postRoute,
-  postGuide,
-  postReroute,
-  postHelpMessage,
-} from '../api.js';
+import { postRoute, postGuide, postReroute, postHelpMessage } from '../api.js';
 import {
   initFloorplan,
   renderFloor,
@@ -55,7 +50,7 @@ import {
 const SVG_NS = 'http://www.w3.org/2000/svg';
 const TOAST_MS = 3000;
 
-const $ = id => document.getElementById(id);
+const $ = (id) => document.getElementById(id);
 
 const screenEl = $('screen2');
 const floorplanEl = $('floorplan');
@@ -97,16 +92,19 @@ const ICON_PATHS = {
     '<circle cx="12" cy="4" r="2"/><path d="M12 6v6h4"/><path d="M8 12a4 4 0 104 4"/><path d="M15 19l4 2"/>',
   need_help:
     '<path d="M8 12.5V6a1.5 1.5 0 013 0v5"/><path d="M11 10.5V4.5a1.5 1.5 0 013 0v6"/><path d="M14 10.5V6a1.5 1.5 0 013 0v7"/><path d="M8 11a1.5 1.5 0 00-3 0v3.5A6.5 6.5 0 0011.5 21h1a4.5 4.5 0 004.5-4.5V13"/><path d="M3.5 5.5L2 4M4 2.5L3.5 1"/>',
-  fallback: '<circle cx="12" cy="6" r="2.5"/><path d="M7 21v-6a5 5 0 0110 0v6"/>',
+  fallback:
+    '<circle cx="12" cy="6" r="2.5"/><path d="M7 21v-6a5 5 0 0110 0v6"/>',
 };
 const WARNING_PATH =
   '<path d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>';
 
-const DEST_KIND_BASE = 'text-[10px] font-medium px-2 py-0.5 rounded border flex-shrink-0 ml-2 ';
+const DEST_KIND_BASE =
+  'text-[10px] font-medium px-2 py-0.5 rounded border flex-shrink-0 ml-2 ';
 const DEST_KIND_EXIT = 'text-emerald-400 bg-slate-900/80 border-emerald-500/30';
 const DEST_KIND_REFUGE = 'text-cyan-300 bg-slate-900/80 border-cyan-500/30';
 
-const SOURCE_BASE = 'text-[9px] font-bold px-1.5 py-0.5 rounded border flex-shrink-0 mt-0.5 ';
+const SOURCE_BASE =
+  'text-[9px] font-bold px-1.5 py-0.5 rounded border flex-shrink-0 mt-0.5 ';
 const SOURCE_AI = 'text-brand-neon border-brand-neon/40 bg-emerald-950/40';
 const SOURCE_FALLBACK = 'text-slate-400 border-slate-600 bg-slate-900';
 
@@ -158,10 +156,11 @@ function floorLevelLabel(floor) {
 
 /** 경로 중 현재 층에 연속으로 이어진 구간만 뽑는다. 다른 층 좌표를 이 층 평면도에 잇지 않기 위함. */
 function pathRunOnFloor(path, floor) {
-  const from = path.findIndex(node => node.floor === floor);
+  const from = path.findIndex((node) => node.floor === floor);
   if (from < 0) return [];
   const run = [];
-  for (let i = from; i < path.length && path[i].floor === floor; i++) run.push(path[i]);
+  for (let i = from; i < path.length && path[i].floor === floor; i++)
+    run.push(path[i]);
   return run;
 }
 
@@ -186,7 +185,13 @@ function drawPlan(s, changed) {
 
   if (changed.includes('floor')) clearPath(); // 이전 층 경로를 흐리게 남기지 않는다
 
-  renderFloor({ nodes: nodesOnFloor(s.floor), edges: edgesOnFloor(s.floor), floor: s.floor });
+  renderFloor({
+    nodes: nodesOnFloor(s.floor),
+    edges: edgesOnFloor(s.floor),
+    floor: s.floor,
+    // building.json 의 floor_images 에 이미지가 있으면 그 위에 경로를 그린다
+    image: s.building.floor_images?.[String(s.floor)] ?? null,
+  });
   renderHazard({ blockedIds: blockedNodeIds(), smokeIds: smokeNodeIds() });
   if (hasRoute()) renderPath(pathRunOnFloor(s.route.path, s.floor));
   else clearPath();
@@ -195,7 +200,7 @@ function drawPlan(s, changed) {
 
 function syncSummary(s) {
   const notice = getSummaryNotice();
-  const show = which => {
+  const show = (which) => {
     summaryEmpty.classList.toggle('hidden', which !== 'empty');
     summaryBody.classList.toggle('hidden', which !== 'body');
     notice.classList.toggle('hidden', which !== 'notice');
@@ -203,37 +208,80 @@ function syncSummary(s) {
 
   if (!s.building) {
     notice.replaceChildren(
-      createEl('p', 'text-sm font-bold text-white text-center', '평면도를 불러오는 중…'),
-      createEl('p', 'text-[11px] text-slate-400 mt-1 text-center', '이 문구가 계속 보이면 새로고침해 주세요.'),
+      createEl(
+        'p',
+        'text-sm font-bold text-white text-center',
+        '평면도를 불러오는 중…',
+      ),
+      createEl(
+        'p',
+        'text-[11px] text-slate-400 mt-1 text-center',
+        '이 문구가 계속 보이면 새로고침해 주세요.',
+      ),
     );
     show('notice');
   } else if (hasRoute()) {
     const route = s.route;
     destName.textContent = `${route.destination.floor}층 ${route.destination.name}`;
     destKind.textContent = destinationKindLabel();
-    destKind.className = DEST_KIND_BASE + (route.destination_type === 'exit' ? DEST_KIND_EXIT : DEST_KIND_REFUGE);
+    destKind.className =
+      DEST_KIND_BASE +
+      (route.destination_type === 'exit' ? DEST_KIND_EXIT : DEST_KIND_REFUGE);
     statDist.textContent = String(route.distance_m);
     statEta.textContent = etaLabel();
     statStart.textContent = route.start.name;
     show('body');
   } else if (isNoRoute()) {
     const route = s.route;
-    const fallbackBox = createEl('div', 'mt-2 px-3 py-2 rounded-lg bg-amber-950/40 border border-amber-700/40');
+    const fallbackBox = createEl(
+      'div',
+      'mt-2 px-3 py-2 rounded-lg bg-amber-950/40 border border-amber-700/40',
+    );
     fallbackBox.append(
-      createEl('p', 'text-[10px] font-bold text-amber-400 mb-0.5', '지금 할 일'),
-      createEl('p', 'text-xs text-amber-100 leading-relaxed', route.fallback_action || ''),
+      createEl(
+        'p',
+        'text-[10px] font-bold text-amber-400 mb-0.5',
+        '지금 할 일',
+      ),
+      createEl(
+        'p',
+        'text-xs text-amber-100 leading-relaxed',
+        route.fallback_action || '',
+      ),
     );
     notice.replaceChildren(
-      createEl('p', 'text-sm font-bold text-rose-300', '안전한 이동 경로를 찾지 못했습니다'),
-      createEl('p', 'text-[11px] text-slate-300 mt-1 leading-snug', route.reason || ''),
-      ...(route.start?.name ? [createEl('p', 'text-[11px] text-teal-300 mt-1', `현재 위치: ${route.start.name}`)] : []),
+      createEl(
+        'p',
+        'text-sm font-bold text-rose-300',
+        '안전한 이동 경로를 찾지 못했습니다',
+      ),
+      createEl(
+        'p',
+        'text-[11px] text-slate-300 mt-1 leading-snug',
+        route.reason || '',
+      ),
+      ...(route.start?.name
+        ? [
+            createEl(
+              'p',
+              'text-[11px] text-teal-300 mt-1',
+              `현재 위치: ${route.start.name}`,
+            ),
+          ]
+        : []),
       fallbackBox,
     );
     notice.setAttribute('role', 'alert');
     show('notice');
     return syncActionButtons(s);
   } else if (isLoading('route')) {
-    notice.replaceChildren(createEl('p', 'text-sm font-bold text-white text-center py-2', '대피 경로를 계산하는 중…'));
+    notice.replaceChildren(
+      createEl(
+        'p',
+        'text-sm font-bold text-white text-center py-2',
+        '대피 경로를 계산하는 중…',
+      ),
+    );
     show('notice');
   } else {
     show('empty');
@@ -272,31 +320,49 @@ function syncGuide(s) {
 
   guideSource.classList.remove('hidden');
   guideSource.textContent = guide.source === 'ai' ? 'AI 생성' : '기본 안내';
-  guideSource.className = SOURCE_BASE + (guide.source === 'ai' ? SOURCE_AI : SOURCE_FALLBACK);
+  guideSource.className =
+    SOURCE_BASE + (guide.source === 'ai' ? SOURCE_AI : SOURCE_FALLBACK);
 
-  guideSteps.replaceChildren(...(guide.steps || []).map((step, i) => {
-    const li = createEl('li', 'flex gap-2 text-xs text-slate-200 leading-relaxed');
-    li.append(
-      createEl('span',
-        'flex-shrink-0 w-4 h-4 rounded-full bg-brand-neon/15 border border-brand-neon/40 text-brand-neon text-[9px] font-bold flex items-center justify-center mt-0.5',
-        String(i + 1)),
-      createEl('span', '', step),
-    );
-    return li;
-  }));
+  guideSteps.replaceChildren(
+    ...(guide.steps || []).map((step, i) => {
+      const li = createEl(
+        'li',
+        'flex gap-2 text-xs text-slate-200 leading-relaxed',
+      );
+      li.append(
+        createEl(
+          'span',
+          'flex-shrink-0 w-4 h-4 rounded-full bg-brand-neon/15 border border-brand-neon/40 text-brand-neon text-[9px] font-bold flex items-center justify-center mt-0.5',
+          String(i + 1),
+        ),
+        createEl('span', '', step),
+      );
+      return li;
+    }),
+  );
 
-  guideCautions.replaceChildren(...(guide.cautions || []).filter(Boolean).map(caution => {
-    const p = createEl('p', 'flex gap-1.5 text-[11px] text-amber-300 leading-snug');
-    p.append(createIcon(WARNING_PATH, 'w-3 h-3 flex-shrink-0 mt-0.5'), createEl('span', '', caution));
-    return p;
-  }));
+  guideCautions.replaceChildren(
+    ...(guide.cautions || []).filter(Boolean).map((caution) => {
+      const p = createEl(
+        'p',
+        'flex gap-1.5 text-[11px] text-amber-300 leading-snug',
+      );
+      p.append(
+        createIcon(WARNING_PATH, 'w-3 h-3 flex-shrink-0 mt-0.5'),
+        createEl('span', '', caution),
+      );
+      return p;
+    }),
+  );
 
   guideCard.classList.remove('hidden');
 }
 
 function syncBadge(s) {
   badgeLabel.textContent = mobilityLabel();
-  badgeIcon.replaceChildren(createIcon(ICON_PATHS[s.mobility] || ICON_PATHS.fallback, 'w-4 h-4'));
+  badgeIcon.replaceChildren(
+    createIcon(ICON_PATHS[s.mobility] || ICON_PATHS.fallback, 'w-4 h-4'),
+  );
 }
 
 function syncHazardChip(s) {
@@ -320,7 +386,10 @@ subscribe(['building', 'route', 'loading'], syncSummary);
 subscribe(['route', 'guide', 'loading'], syncGuide);
 subscribe(['mobility', 'profiles', 'route'], syncBadge);
 subscribe(['route'], syncHazardChip);
-subscribe(['scenarios', 'scenarioKey', 'triggeredEvents', 'loading'], syncEventButton);
+subscribe(
+  ['scenarios', 'scenarioKey', 'triggeredEvents', 'loading'],
+  syncEventButton,
+);
 
 /* ───────── 흐름 1: 경로 계산 ───────── */
 
@@ -412,7 +481,9 @@ async function handleEvent() {
     console.error('[screen2] 우회 경로 재탐색 실패', err);
     setLoading('route', false);
     setError(err.message);
-    showToast(`상황 변화를 반영한 경로를 계산하지 못했습니다. 현재 위치를 다시 탭해 주세요. (${err.message})`);
+    showToast(
+      `상황 변화를 반영한 경로를 계산하지 못했습니다. 현재 위치를 다시 탭해 주세요. (${err.message})`,
+    );
     return;
   }
 
@@ -502,10 +573,10 @@ helpBtn.addEventListener('click', handleHelp);
 helpCloseBtn.addEventListener('click', () => closeHelpModal());
 helpCopyBtn.addEventListener('click', copyHelpText);
 helpKakaoBtn.addEventListener('click', sendHelpKakao);
-helpModal.addEventListener('click', event => {
+helpModal.addEventListener('click', (event) => {
   if (event.target === helpModal) closeHelpModal(); // 배경 클릭으로 닫기
 });
-document.addEventListener('keydown', event => {
+document.addEventListener('keydown', (event) => {
   if (event.key === 'Escape') closeHelpModal();
 });
 
