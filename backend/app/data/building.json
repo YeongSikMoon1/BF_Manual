@@ -8,96 +8,268 @@
   ],
   "nodes": [
     {
-      "id": "F3-R301",
-      "type": "room",
+      "id": "F3-STAIR-A",
+      "type": "stair",
       "floor": 3,
-      "name": "301호",
-      "x": 12,
-      "y": 35
+      "name": "전시동 서북 비상계단(A)",
+      "x": 8,
+      "y": 10,
+      "stair_id": "A"
     },
     {
-      "id": "F3-R302",
-      "type": "room",
+      "id": "F3-REFUGE-A",
+      "type": "refuge",
       "floor": 3,
-      "name": "302호",
-      "x": 12,
-      "y": 70
-    },
-    {
-      "id": "F3-R303",
-      "type": "room",
-      "floor": 3,
-      "name": "303호",
-      "x": 68,
-      "y": 35
-    },
-    {
-      "id": "F3-R304",
-      "type": "room",
-      "floor": 3,
-      "name": "304호",
-      "x": 68,
-      "y": 70
+      "name": "전시동 A계단 앞 방화구획 대피공간",
+      "x": 14,
+      "y": 17,
+      "capacity": 6,
+      "fire_door": true
     },
     {
       "id": "F3-C1",
       "type": "corridor",
       "floor": 3,
-      "name": "3층 서측 복도",
-      "x": 30,
-      "y": 35
+      "name": "전시동 서북 로비",
+      "x": 22,
+      "y": 24
+    },
+    {
+      "id": "F3-C6",
+      "type": "corridor",
+      "floor": 3,
+      "name": "전시동 북측 복도",
+      "x": 38,
+      "y": 18
+    },
+    {
+      "id": "F3-C7",
+      "type": "corridor",
+      "floor": 3,
+      "name": "전시동 동측 복도(에스컬레이터 앞)",
+      "x": 52,
+      "y": 34
     },
     {
       "id": "F3-C2",
       "type": "corridor",
       "floor": 3,
-      "name": "3층 중앙 복도",
-      "x": 30,
-      "y": 55
+      "name": "전시동 중앙 교차 복도",
+      "x": 32,
+      "y": 44
     },
     {
       "id": "F3-C3",
       "type": "corridor",
       "floor": 3,
-      "name": "3층 남측 복도",
-      "x": 30,
+      "name": "전시동 서측 복도(302·303 앞)",
+      "x": 22,
+      "y": 56
+    },
+    {
+      "id": "F3-C5",
+      "type": "corridor",
+      "floor": 3,
+      "name": "전시동 서측 외곽 복도",
+      "x": 10,
+      "y": 42
+    },
+    {
+      "id": "F3-C8",
+      "type": "corridor",
+      "floor": 3,
+      "name": "전시동 남측 복도(306 앞)",
+      "x": 38,
       "y": 70
     },
     {
       "id": "F3-C4",
       "type": "corridor",
       "floor": 3,
-      "name": "3층 동측 복도",
-      "x": 60,
-      "y": 55
-    },
-    {
-      "id": "F3-REFUGE-A",
-      "type": "refuge",
-      "floor": 3,
-      "name": "A계단 앞 방화구획 대피공간",
-      "x": 24,
-      "y": 18,
-      "capacity": 6,
-      "fire_door": true
-    },
-    {
-      "id": "F3-STAIR-A",
-      "type": "stair",
-      "floor": 3,
-      "name": "A계단(3층)",
-      "x": 18,
-      "y": 12,
-      "stair_id": "A"
+      "name": "전시동 동남 복도(307 앞)",
+      "x": 50,
+      "y": 62
     },
     {
       "id": "F3-STAIR-B",
       "type": "stair",
       "floor": 3,
-      "name": "B계단(3층)",
-      "x": 82,
-      "y": 12,
+      "name": "전시동 동남 비상계단(B)",
+      "x": 56,
+      "y": 76,
       "stair_id": "B"
+    },
+    {
+      "id": "F3-R301",
+      "type": "room",
+      "floor": 3,
+      "name": "301호",
+      "x": 32,
+      "y": 30
+    },
+    {
+      "id": "F3-R302",
+      "type": "room",
+      "floor": 3,
+      "name": "302호",
+      "x": 24,
+      "y": 44
+    },
+    {
+      "id": "F3-R303",
+      "type": "room",
+      "floor": 3,
+      "name": "303호",
+      "x": 16,
+      "y": 62
+    },
+    {
+      "id": "F3-R304",
+      "type": "room",
+      "floor": 3,
+      "name": "304호",
+      "x": 42,
+      "y": 40
+    },
+    {
+      "id": "F3-R305",
+      "type": "room",
+      "floor": 3,
+      "name": "305호",
+      "x": 36,
+      "y": 56
+    },
+    {
+      "id": "F3-R306",
+      "type": "room",
+      "floor": 3,
+      "name": "306호",
+      "x": 30,
+      "y": 74
+    },
+    {
+      "id": "F3-R307",
+      "type": "room",
+      "floor": 3,
+      "name": "307호",
+      "x": 48,
+      "y": 80
+    },
+    {
+      "id": "F3-STAIR-C",
+      "type": "stair",
+      "floor": 3,
+      "name": "컨벤션동 북측 비상계단(C)",
+      "x": 74,
+      "y": 6,
+      "stair_id": "C"
+    },
+    {
+      "id": "F3-REFUGE-C",
+      "type": "refuge",
+      "floor": 3,
+      "name": "컨벤션동 C계단 앞 방화구획 대피공간",
+      "x": 70,
+      "y": 13,
+      "capacity": 6,
+      "fire_door": true
+    },
+    {
+      "id": "F3-C9",
+      "type": "corridor",
+      "floor": 3,
+      "name": "컨벤션동 북측 복도(VIP룸 앞)",
+      "x": 80,
+      "y": 22
+    },
+    {
+      "id": "F3-C10",
+      "type": "corridor",
+      "floor": 3,
+      "name": "컨벤션동 서측 복도(308~310 앞)",
+      "x": 72,
+      "y": 44
+    },
+    {
+      "id": "F3-HALL-CV",
+      "type": "corridor",
+      "floor": 3,
+      "name": "컨벤션동 중앙홀",
+      "x": 80,
+      "y": 50
+    },
+    {
+      "id": "F3-C11",
+      "type": "corridor",
+      "floor": 3,
+      "name": "컨벤션동 남측 로비(테라스 앞)",
+      "x": 80,
+      "y": 80
+    },
+    {
+      "id": "F3-STAIR-D",
+      "type": "stair",
+      "floor": 3,
+      "name": "컨벤션동 남측 테라스 비상계단(D)",
+      "x": 88,
+      "y": 92,
+      "stair_id": "D"
+    },
+    {
+      "id": "F3-R308",
+      "type": "room",
+      "floor": 3,
+      "name": "308호",
+      "x": 64,
+      "y": 26
+    },
+    {
+      "id": "F3-R309",
+      "type": "room",
+      "floor": 3,
+      "name": "309호",
+      "x": 64,
+      "y": 42
+    },
+    {
+      "id": "F3-R310",
+      "type": "room",
+      "floor": 3,
+      "name": "310호",
+      "x": 64,
+      "y": 58
+    },
+    {
+      "id": "F3-R311",
+      "type": "room",
+      "floor": 3,
+      "name": "311호",
+      "x": 90,
+      "y": 56
+    },
+    {
+      "id": "F3-R312",
+      "type": "room",
+      "floor": 3,
+      "name": "312호",
+      "x": 90,
+      "y": 70
+    },
+    {
+      "id": "F3-VIP",
+      "type": "room",
+      "floor": 3,
+      "name": "VIP ROOM",
+      "x": 92,
+      "y": 24
+    },
+    {
+      "id": "F3-PREP",
+      "type": "room",
+      "floor": 3,
+      "name": "준비실",
+      "x": 88,
+      "y": 40
     },
     {
       "id": "F2-STAIR-A",
@@ -178,19 +350,47 @@
       "y": 60
     },
     {
-      "id": "F3-C5",
-      "type": "corridor",
-      "floor": 3,
-      "name": "3층 서측 연결 복도",
-      "x": 14,
-      "y": 55
+      "id": "F2-STAIR-C",
+      "type": "stair",
+      "floor": 2,
+      "name": "C계단(2층)",
+      "x": 74,
+      "y": 6,
+      "stair_id": "C"
+    },
+    {
+      "id": "F2-STAIR-D",
+      "type": "stair",
+      "floor": 2,
+      "name": "D계단(2층)",
+      "x": 88,
+      "y": 92,
+      "stair_id": "D"
+    },
+    {
+      "id": "F1-STAIR-C",
+      "type": "stair",
+      "floor": 1,
+      "name": "C계단(1층)",
+      "x": 74,
+      "y": 6,
+      "stair_id": "C"
+    },
+    {
+      "id": "F1-STAIR-D",
+      "type": "stair",
+      "floor": 1,
+      "name": "D계단(1층)",
+      "x": 88,
+      "y": 92,
+      "stair_id": "D"
     }
   ],
   "edges": [
     {
       "from": "F3-R301",
-      "to": "F3-C1",
-      "dist": 8,
+      "to": "F3-C6",
+      "dist": 6,
       "kind": "door",
       "step": false,
       "width": 90
@@ -198,31 +398,79 @@
     {
       "from": "F3-R302",
       "to": "F3-C3",
-      "dist": 8,
+      "dist": 6,
       "kind": "door",
       "step": false,
       "width": 90
     },
     {
       "from": "F3-R303",
-      "to": "F3-C4",
-      "dist": 10,
+      "to": "F3-C3",
+      "dist": 6,
       "kind": "door",
       "step": false,
       "width": 90
     },
     {
       "from": "F3-R304",
+      "to": "F3-C7",
+      "dist": 6,
+      "kind": "door",
+      "step": false,
+      "width": 90
+    },
+    {
+      "from": "F3-R305",
+      "to": "F3-C2",
+      "dist": 6,
+      "kind": "door",
+      "step": false,
+      "width": 90
+    },
+    {
+      "from": "F3-R306",
+      "to": "F3-C8",
+      "dist": 6,
+      "kind": "door",
+      "step": false,
+      "width": 90
+    },
+    {
+      "from": "F3-R307",
       "to": "F3-C4",
-      "dist": 12,
+      "dist": 8,
       "kind": "door",
       "step": false,
       "width": 90
     },
     {
       "from": "F3-C1",
-      "to": "F3-C2",
-      "dist": 12,
+      "to": "F3-C6",
+      "dist": 14,
+      "kind": "corridor",
+      "step": false,
+      "width": 180
+    },
+    {
+      "from": "F3-C6",
+      "to": "F3-C7",
+      "dist": 20,
+      "kind": "corridor",
+      "step": false,
+      "width": 180
+    },
+    {
+      "from": "F3-C7",
+      "to": "F3-C4",
+      "dist": 24,
+      "kind": "corridor",
+      "step": false,
+      "width": 180
+    },
+    {
+      "from": "F3-C2",
+      "to": "F3-C7",
+      "dist": 16,
       "kind": "corridor",
       "step": false,
       "width": 180
@@ -230,23 +478,55 @@
     {
       "from": "F3-C2",
       "to": "F3-C3",
-      "dist": 10,
+      "dist": 12,
       "kind": "corridor",
       "step": false,
       "width": 180
     },
     {
       "from": "F3-C2",
-      "to": "F3-C4",
+      "to": "F3-C1",
+      "dist": 14,
+      "kind": "corridor",
+      "step": false,
+      "width": 180
+    },
+    {
+      "from": "F3-C3",
+      "to": "F3-C5",
+      "dist": 14,
+      "kind": "corridor",
+      "step": false,
+      "width": 150
+    },
+    {
+      "from": "F3-C5",
+      "to": "F3-C1",
       "dist": 22,
       "kind": "corridor",
       "step": false,
-      "width": 160
+      "width": 150
+    },
+    {
+      "from": "F3-C3",
+      "to": "F3-C8",
+      "dist": 16,
+      "kind": "corridor",
+      "step": false,
+      "width": 180
+    },
+    {
+      "from": "F3-C8",
+      "to": "F3-C4",
+      "dist": 16,
+      "kind": "corridor",
+      "step": false,
+      "width": 180
     },
     {
       "from": "F3-C1",
       "to": "F3-REFUGE-A",
-      "dist": 14,
+      "dist": 6,
       "kind": "fire_door",
       "step": false,
       "width": 100
@@ -254,7 +534,7 @@
     {
       "from": "F3-REFUGE-A",
       "to": "F3-STAIR-A",
-      "dist": 6,
+      "dist": 4,
       "kind": "door",
       "step": false,
       "width": 100
@@ -262,10 +542,122 @@
     {
       "from": "F3-C4",
       "to": "F3-STAIR-B",
-      "dist": 25,
+      "dist": 10,
       "kind": "door",
       "step": true,
       "width": 100
+    },
+    {
+      "from": "F3-R308",
+      "to": "F3-C10",
+      "dist": 6,
+      "kind": "door",
+      "step": false,
+      "width": 90
+    },
+    {
+      "from": "F3-R309",
+      "to": "F3-C10",
+      "dist": 6,
+      "kind": "door",
+      "step": false,
+      "width": 90
+    },
+    {
+      "from": "F3-R310",
+      "to": "F3-C10",
+      "dist": 6,
+      "kind": "door",
+      "step": false,
+      "width": 90
+    },
+    {
+      "from": "F3-R311",
+      "to": "F3-HALL-CV",
+      "dist": 8,
+      "kind": "door",
+      "step": false,
+      "width": 90
+    },
+    {
+      "from": "F3-R312",
+      "to": "F3-C11",
+      "dist": 8,
+      "kind": "door",
+      "step": false,
+      "width": 90
+    },
+    {
+      "from": "F3-VIP",
+      "to": "F3-C9",
+      "dist": 6,
+      "kind": "door",
+      "step": false,
+      "width": 90
+    },
+    {
+      "from": "F3-PREP",
+      "to": "F3-HALL-CV",
+      "dist": 6,
+      "kind": "door",
+      "step": false,
+      "width": 90
+    },
+    {
+      "from": "F3-C10",
+      "to": "F3-HALL-CV",
+      "dist": 10,
+      "kind": "corridor",
+      "step": false,
+      "width": 200
+    },
+    {
+      "from": "F3-HALL-CV",
+      "to": "F3-C9",
+      "dist": 18,
+      "kind": "corridor",
+      "step": false,
+      "width": 200
+    },
+    {
+      "from": "F3-HALL-CV",
+      "to": "F3-C11",
+      "dist": 18,
+      "kind": "corridor",
+      "step": false,
+      "width": 200
+    },
+    {
+      "from": "F3-C10",
+      "to": "F3-C11",
+      "dist": 20,
+      "kind": "corridor",
+      "step": false,
+      "width": 180
+    },
+    {
+      "from": "F3-C9",
+      "to": "F3-REFUGE-C",
+      "dist": 8,
+      "kind": "fire_door",
+      "step": false,
+      "width": 100
+    },
+    {
+      "from": "F3-REFUGE-C",
+      "to": "F3-STAIR-C",
+      "dist": 4,
+      "kind": "door",
+      "step": false,
+      "width": 100
+    },
+    {
+      "from": "F3-C11",
+      "to": "F3-STAIR-D",
+      "dist": 8,
+      "kind": "door",
+      "step": false,
+      "width": 110
     },
     {
       "from": "F3-STAIR-A",
@@ -282,6 +674,70 @@
       "kind": "stair",
       "step": true,
       "width": 120
+    },
+    {
+      "from": "F3-STAIR-C",
+      "to": "F2-STAIR-C",
+      "dist": 20,
+      "kind": "stair",
+      "step": true,
+      "width": 120
+    },
+    {
+      "from": "F3-STAIR-D",
+      "to": "F2-STAIR-D",
+      "dist": 20,
+      "kind": "stair",
+      "step": true,
+      "width": 120
+    },
+    {
+      "from": "F2-STAIR-C",
+      "to": "F2-C1",
+      "dist": 28,
+      "kind": "door",
+      "step": true,
+      "width": 100
+    },
+    {
+      "from": "F2-STAIR-D",
+      "to": "F2-C1",
+      "dist": 28,
+      "kind": "door",
+      "step": true,
+      "width": 100
+    },
+    {
+      "from": "F2-STAIR-C",
+      "to": "F1-STAIR-C",
+      "dist": 20,
+      "kind": "stair",
+      "step": true,
+      "width": 120
+    },
+    {
+      "from": "F2-STAIR-D",
+      "to": "F1-STAIR-D",
+      "dist": 20,
+      "kind": "stair",
+      "step": true,
+      "width": 120
+    },
+    {
+      "from": "F1-STAIR-C",
+      "to": "F1-LOBBY",
+      "dist": 30,
+      "kind": "corridor",
+      "step": false,
+      "width": 200
+    },
+    {
+      "from": "F1-STAIR-D",
+      "to": "F1-EXIT-2",
+      "dist": 18,
+      "kind": "door",
+      "step": true,
+      "width": 110
     },
     {
       "from": "F2-STAIR-A",
@@ -354,27 +810,11 @@
       "kind": "door",
       "step": true,
       "width": 110
-    },
-    {
-      "from": "F3-C3",
-      "to": "F3-C5",
-      "dist": 16,
-      "kind": "corridor",
-      "step": false,
-      "width": 150
-    },
-    {
-      "from": "F3-C5",
-      "to": "F3-C1",
-      "dist": 20,
-      "kind": "corridor",
-      "step": false,
-      "width": 150
     }
   ],
   "facilities": {
     "F3-REFUGE-A": {
-      "description": "방화문으로 구획된 3층 대피공간. 외기에 면한 창이 있어 구조대 진입이 가능합니다.",
+      "description": "전시동 서북 비상계단 앞, 방화문으로 구획된 대피공간.",
       "equipment": [
         "방화문",
         "비상통화장치",
@@ -398,6 +838,13 @@
       "description": "후면 비상구. 출입문 앞에 단차 1단이 있습니다.",
       "equipment": [
         "유도등"
+      ]
+    },
+    "F3-REFUGE-C": {
+      "description": "컨벤션동 북측 비상계단 앞, 방화문으로 구획된 대피공간.",
+      "equipment": [
+        "방화문",
+        "비상통화장치"
       ]
     }
   }

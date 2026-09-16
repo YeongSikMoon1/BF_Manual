@@ -110,9 +110,9 @@ def fallback(route: dict) -> dict:
         return {
             "headline": "안전한 경로를 찾지 못했습니다",
             "steps": [
-                "가까운 방 안으로 들어가 문을 닫으세요.",
+                "현재 위치에서 벗어나 방화구획 대피공간으로 이동하세요.",
                 "젖은 천으로 문틈을 막아 연기 유입을 차단하세요.",
-                "119에 현재 층과 호실을 알리고 구조를 기다리세요.",
+                "119에 위치를 알리고 구조를 기다리세요.",
             ],
             "cautions": [route.get("reason", "")],
             "source": "fallback",
@@ -122,7 +122,7 @@ def fallback(route: dict) -> dict:
     dest = route["destination"]
     is_exit = route["destination_type"] == "exit"
     steps = [
-        "문을 열기 전 손잡이가 뜨거운지 확인하세요.",
+        "문을 열기 전 손으로 문 표면 온도를 확인하세요.",
         "자세를 낮추고 벽을 짚으며 이동하세요.",
         f"{dest['name']}까지 약 {route['distance_m']}m 이동하세요.",
     ]
