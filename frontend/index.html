@@ -28,6 +28,7 @@
   };
 </script>
 <link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/ar.css">
 </head>
 
 <body class="bg-[#070B11] text-slate-100 min-h-screen flex justify-center font-sans antialiased overflow-x-hidden">
@@ -235,107 +236,42 @@
 
 
 <!-- ═══════════════════════════════════════════════════════════
-     화면 3 — AR 안내
+     화면 3 — AR 안내 (frontend/ar 독립 모듈 통합)
+     로직: js/screens/screen3.js · 스타일: css/ar.css
      ═══════════════════════════════════════════════════════════ -->
-<section id="screen3" class="screen flex-col min-h-[100dvh] relative overflow-hidden bg-[#070e17]">
-
-  <!-- 실제 카메라 영상 (권한 허용 시) -->
-  <video id="ar-video" class="absolute inset-0 w-full h-full object-cover z-0 hidden" autoplay playsinline muted></video>
-
-  <!-- 카메라 실패 시 폴백 배경 : 시연이 끊기지 않게 남겨둠 -->
-  <div id="ar-fallback-bg" class="absolute inset-0 z-0 pointer-events-none overflow-hidden">
-    <div class="absolute inset-0 bg-gradient-to-b from-[#020509]/90 via-[#07131a]/60 to-[#02060b]/95"></div>
-    <svg class="absolute inset-0 w-full h-full opacity-40" preserveAspectRatio="none" viewBox="0 0 400 800">
-      <line x1="0" y1="0" x2="200" y2="350" stroke="#1ae5be" stroke-dasharray="4 6" stroke-width=".8" opacity=".4"/>
-      <line x1="400" y1="0" x2="200" y2="350" stroke="#1ae5be" stroke-dasharray="4 6" stroke-width=".8" opacity=".4"/>
-      <line x1="90" y1="120" x2="90" y2="600" stroke="#154050" stroke-width="2" opacity=".5"/>
-      <line x1="310" y1="120" x2="310" y2="600" stroke="#154050" stroke-width="2" opacity=".5"/>
-      <line x1="0" y1="800" x2="190" y2="380" stroke="#1ae5be" stroke-width="1.5" opacity=".3"/>
-      <line x1="400" y1="800" x2="210" y2="380" stroke="#1ae5be" stroke-width="1.5" opacity=".3"/>
-    </svg>
-    <div class="absolute top-[35%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-[#1ae5be]/10 rounded-full blur-3xl"></div>
-  </div>
-
-  <!-- 바닥 쉐브론 -->
-  <div class="absolute inset-0 z-10 pointer-events-none flex items-center justify-center ar-floor-perspective">
-    <div id="ar-chevrons" class="ar-path-plane flex flex-col items-center w-64 h-96 -mb-20 justify-center transition-transform duration-500">
-      <div class="flex flex-col items-center space-y-4 chevron-flow">
-        <svg class="w-16 h-8 text-[#1ae5be]/70 drop-shadow-[0_0_12px_#1ae5be]" fill="none" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 100 40"><polyline points="10,35 50,10 90,35"/></svg>
-        <svg class="w-24 h-12 text-[#1ae5be] drop-shadow-[0_0_18px_#1ae5be]" fill="none" stroke="currentColor" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 100 40"><polyline points="8,35 50,10 92,35"/></svg>
-        <svg class="w-36 h-16 text-[#3bfd9f] drop-shadow-[0_0_24px_#3bfd9f]" fill="none" stroke="currentColor" stroke-width="11" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 100 40"><polyline points="6,34 50,8 94,34"/></svg>
-        <div class="w-48 h-2 bg-gradient-to-r from-transparent via-[#3bfd9f] to-transparent blur-sm mt-2"></div>
-      </div>
+<section id="screen3" class="screen">
+  <main class="ar-screen" id="arScreen">
+    <video id="arCamera" autoplay muted playsinline aria-label="AR 대피용 후면 카메라"></video>
+    <canvas id="obstacleCanvas" aria-hidden="true"></canvas>
+    <div class="shade" aria-hidden="true"></div>
+    <header>
+      <button id="arBackButton" type="button" class="ar-back" aria-label="평면도로 돌아가기">← 평면도</button>
+      <div><small>BF Manual</small></div>
+      <span class="live"><i></i> LIVE</span>
+    </header>
+    <div class="situation situation-fire"><b>⚠</b><div><strong>화재 발생</strong><small id="fireLocation">화재 위치 · 3층 동측</small></div></div>
+    <div class="situation situation-location"><b>⌖</b><div><strong>현재 위치</strong><small id="location">—</small></div></div>
+    <p class="obstacle-status" id="obstacleStatus" role="status">대형 장애물 인식 준비 중</p>
+    <section class="guidance" aria-live="polite">
+      <div class="direction-group"><div class="direction-icon" aria-hidden="true">⬆</div><div class="direction-card"><strong id="direction">앞으로 직진하세요</strong><p>화살표 방향으로 이동하세요.</p></div></div>
+      <div class="arrow-wrap"><div class="arrow forward" id="arrow" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div></div>
+    </section>
+    <section class="status"><div class="step-status"><strong><img class="steps-icon" src="ar/assets/footsteps.png" alt=""> 앞으로 <span id="steps">0</span>걸음</strong><em>약 <span id="distance">0</span>m</em></div></section>
+    <p class="message" id="message" role="status">카메라를 연결하고 있습니다.</p>
+    <nav class="controls" aria-label="AR 안내 도구">
+      <button id="mapButton" type="button" aria-pressed="false"><b>🗺️</b><span>경로 지도</span></button>
+      <button id="torchButton" type="button" disabled aria-pressed="false"><b>⚡</b><span>손전등</span></button>
+      <button id="voiceButton" type="button" class="active" aria-pressed="true"><b>🔊</b><span>음성 안내</span></button>
+      <button id="signalButton" type="button" aria-pressed="false"><b>📣</b><span>호출 신호</span></button>
+    </nav>
+    <div class="map-modal" id="mapModal" role="dialog" aria-modal="true" aria-labelledby="mapTitle" hidden>
+      <section class="map-card">
+        <header><div><small>대피 경로 · <span id="exitName">—</span></small><strong id="mapTitle">평면도 내 현재 위치</strong></div><button id="mapClose" type="button" aria-label="지도 닫기">×</button></header>
+        <div class="map-view"><img id="mapImage" alt=""><svg viewBox="0 0 100 100" preserveAspectRatio="none"><polyline class="route-shadow" id="routeShadow"/><polyline class="route" id="routeLine"/><circle class="exit" id="exitDot" r="1.5"/></svg><span class="walker" id="walker">🚶</span></div>
+        <footer><div><strong id="progress">출발 지점</strong><span id="remaining">전체 거리 계산 중</span><small id="history">제외된 경로 없음</small></div><div><button id="resetButton" type="button" disabled>우회 기록 초기화</button><button id="detourButton" type="button">다른 안전 출구 찾기</button></div></footer>
+      </section>
     </div>
-  </div>
-
-  <!-- 타겟 링 -->
-  <div class="absolute top-[37%] left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 flex flex-col items-center pointer-events-none">
-    <div class="relative flex items-center justify-center w-28 h-28">
-      <div class="target-ring absolute w-24 h-24 rounded-full border-2 border-[#1ae5be]/80"></div>
-      <div class="w-20 h-20 rounded-full border-2 border-dashed border-[#00F2FE]/70 flex items-center justify-center bg-[#1ae5be]/10">
-        <div class="w-3 h-3 rounded-full bg-[#3bfd9f] shadow-[0_0_12px_#3bfd9f]"></div>
-      </div>
-    </div>
-    <div class="mt-2.5 px-3 py-1 rounded-full bg-[#081724]/90 border border-[#1ae5be]/50 backdrop-blur-md flex items-center gap-1.5">
-      <span class="w-2 h-2 rounded-full bg-[#3bfd9f] animate-ping"></span>
-      <span id="ar-target-badge" class="text-xs font-bold tracking-wide text-[#3bfd9f]">—</span>
-    </div>
-  </div>
-
-  <!-- 상단 HUD -->
-  <header class="relative z-20 pt-6 px-4 pb-2">
-    <div class="w-full bg-[#071521]/85 backdrop-blur-xl border border-[#1ae5be]/40 rounded-2xl p-3.5 flex items-center justify-between">
-      <div class="flex items-center gap-3 min-w-0">
-        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-[#1ae5be]/20 to-[#00F2FE]/10 border border-[#1ae5be]/50 flex items-center justify-center text-[#1ae5be] flex-shrink-0">
-          <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
-        </div>
-        <div class="flex flex-col min-w-0">
-          <span class="text-xs text-slate-400 font-medium">다음 목표 지점</span>
-          <h1 id="ar-next-name" class="text-base font-bold text-white tracking-tight truncate">—</h1>
-          <p class="text-[11px] text-[#1ae5be] font-semibold">바닥 녹색 유도 화살표를 따라 이동</p>
-        </div>
-      </div>
-      <div class="text-right pl-2 border-l border-slate-800 flex-shrink-0">
-        <div class="text-lg font-black text-[#1ae5be] leading-none"><span id="ar-remain">0</span><span class="text-xs font-semibold ml-0.5">m</span></div>
-        <span class="text-[10px] text-slate-400">잔여 거리</span>
-      </div>
-    </div>
-  </header>
-
-  <div class="flex-1"></div>
-
-  <!-- 하단 컨트롤 -->
-  <footer class="relative z-20 px-4 pb-6 space-y-2.5">
-    <div id="ar-camera-note" class="hidden text-[11px] text-amber-300 bg-amber-950/50 border border-amber-600/40 rounded-xl px-3 py-2 text-center">
-      카메라를 사용할 수 없어 시뮬레이션 화면으로 안내합니다.
-    </div>
-
-    <div class="bg-[#071521]/85 backdrop-blur-xl border border-slate-700/60 rounded-2xl p-3 flex items-center justify-between text-center">
-      <div class="flex-1">
-        <p class="text-[10px] text-slate-400">현재 층</p>
-        <p id="ar-floor" class="text-sm font-bold text-slate-100">—</p>
-      </div>
-      <div class="w-px h-8 bg-slate-700"></div>
-      <div class="flex-1">
-        <p class="text-[10px] text-slate-400">남은 구간</p>
-        <p id="ar-legs" class="text-sm font-bold text-slate-100">—</p>
-      </div>
-      <div class="w-px h-8 bg-slate-700"></div>
-      <div class="flex-1">
-        <p class="text-[10px] text-slate-400">이동 상태</p>
-        <p id="ar-mobility" class="text-sm font-bold text-teal-300">—</p>
-      </div>
-    </div>
-
-    <button id="btn-ar-next" type="button"
-      class="w-full py-4 rounded-2xl bg-gradient-to-r from-emerald-400 to-cyan-400 text-slate-950 font-black text-base active:scale-[.98] transition-transform">
-      이 지점 도착
-    </button>
-    <button id="btn-ar-back" type="button"
-      class="w-full py-3 rounded-2xl border border-slate-600 bg-slate-900/70 text-slate-200 font-bold text-sm active:scale-[.98] transition-all">
-      평면도로 돌아가기
-    </button>
-  </footer>
+  </main>
 </section>
 
 
@@ -368,6 +304,9 @@
 </div>
 
 <!-- ES 모듈: state.js · api.js · floorplan.js 는 각 화면 모듈이 import 한다 -->
+<!-- AR 장애물 인식 (없어도 AR 안내는 동작) -->
+<script defer src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.3"></script>
 <script type="module" src="js/screens/screen1.js"></script>
 <script type="module" src="js/screens/screen2.js"></script>
 <script type="module" src="js/screens/screen3.js"></script>
